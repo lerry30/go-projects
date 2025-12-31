@@ -125,7 +125,7 @@ func ClockInOutEmployee(id string) bool {
 }
 
 func moveAttTimeToMonth() {
-	// get the attendance time in/out in day.txt to append in the month.txt
+	// get the attendance time in/out in day.txt to append in the logs.txt
 	next, close, err := utils.ReadFile("data/clock_inout/day.txt")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error reading file: day on MoveAttTimeToMonth", err)
@@ -148,7 +148,7 @@ func moveAttTimeToMonth() {
 		attTime = attTime + "\n" + line
 	}
 
-	utils.LogFile("data/clock_inout/month.txt", attTime, false)
+	utils.LogFile("data/clock_inout/logs.txt", attTime, false)
 }
 
 func attachDate() string {

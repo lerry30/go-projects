@@ -37,6 +37,7 @@ func CalcPayroll(scanner *bufio.Scanner) {
 
 		//fmt.Printf("|    ID    |      Name    |     Position    |     Hours     |       OT        |        Gross Income     |\n")
 
+		// Loop over each employee's payroll info
 		for _, e := range employeePayroll {
 			id := e.Employee.EmployeeId
 			name := e.Employee.Name

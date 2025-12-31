@@ -14,15 +14,20 @@ import (
 )
 
 func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
-	year, month, err := utils.ParseMonthYear(date)
+	// contains the employee id as a key and the list of employee logs as a value
 	attendance := make(map[string][]string)
 
+	// extract year and month from a string
+	year, month, err := utils.ParseMonthYear(date)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error: ", err)
 		return
 	}
 
-	next, close, err := utils.ReadFile("data/clock_inout/month.txt")
+	// logs.txt contains all the logs, but it is not efficient because 
+	// it has all the data for every month and year. Reading this huge 
+	// file is not a good idea; however, this is just a practice thing of mine
+	next, close, err := utils.ReadFile("data/clock_inout/logs.txt")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error: opening file error at DisplayPayroll", err)
 		return
@@ -31,22 +36,23 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 
 	isCaptured := false
 	for {
-		line, err := next()
-		if err == io.EOF {
+		line, err := next() // read every line
+		if err == io.EOF { // EOF - end
 			break
 		}
 
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error: reading file content at DisplayPayroll - all", err)
-			return
+			return // abort this process
 		}
 		
 		line = strings.TrimSpace(line)
 
+		// === is my delimiter to separate dates
 		if line == "===" {
 			isCaptured = false
 
-			line2Date, err := next()
+			lineDate, err := next() // get the next line, which is the date. Date comes after the delimiter(===)
 			if err == io.EOF {
 				break
 			}
@@ -56,17 +62,27 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 				return
 			}
 
-			t, err := utils.ParseDateString(strings.TrimSpace(line2Date))
+			// convert a string to a date object
+			// this date came from logs.txt to compare with the input date
+			t, err := utils.ParseDateString(strings.TrimSpace(lineDate))
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "Invalid date: ", err)
 				return
 			}
 
+			// filtering
+			// input vs. record
 			if t.Year() == year && int(t.Month()) == month {
-				isCaptured = true
-				continue
+				isCaptured = true // flag
+				continue // ------------------- if it matched, then go over to the top to read the next line
 			}
 		}
+
+		/*
+		===
+		date == input date - isCaptured = true
+		if isCaptured is true, then save all the in/out logs
+		*/
 
 		if isCaptured {
 			columns := strings.Split(line, " | ")
@@ -80,7 +96,7 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 			out := columns[2]
 
 			attTime := in + " | " + out
-			attendance[employeedId] = append(attendance[employeedId], attTime)
+			attendance[employeedId] = append(attendance[employeedId], attTime) // save in/out logs with id in a map
 		}
 	}
 
