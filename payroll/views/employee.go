@@ -95,29 +95,3 @@ func DisplayEmployees(scanner *bufio.Scanner) {
 
 	utils.WaitToPressEnter(scanner)
 }
-
-/*
-	
-*/
-func CalcPayroll(scanner *bufio.Scanner) {
-
-	for {
-		utils.ClearScreen()
-		fmt.Print("\n")
-		fmt.Println("╔════════════════════════════════════════════════╗")
-		fmt.Println("║                     PAYROLL                    ║")
-		fmt.Println("╚════════════════════════════════════════════════╝")
-		fmt.Println("Enter 'cancel' to abort")
-
-		dateInput, abort := utils.Prompt("Enter date(MM/YYYY): ", scanner)
-		if abort {
-			break
-		}
-
-		if dateInput == "" {
-			continue
-		}
-
-		utils.WaitToPressEnter(scanner)
-	}
-}

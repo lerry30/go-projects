@@ -54,8 +54,15 @@ func ClockInOutEmployee(id string) bool {
 		defer closeFInOutDay()
 
 		line, err := nextFInOutDay()
+
+		if err != io.EOF && err != nil {
+			fmt.Fprintln(os.Stderr, "clock in/out - reading file error: clock_inout --", err)
+			return false
+		}
+		
+		currentRecords := true
 		punchDate := strings.TrimSpace(line) // timestamp
-		if err == nil || punchDate != "" {
+		if punchDate != "" {
 			// is the date today
 			t, err := utils.ParseDateString(punchDate)
 			if err != nil {
@@ -65,6 +72,7 @@ func ClockInOutEmployee(id string) bool {
 			if t.Before(time.Now()) {
 				moveAttTimeToMonth() // transfer content
 				punchDate = attachDate() // insert date to file and return that date
+				currentRecords = false
 			}
 		} else {
 			punchDate = attachDate()
@@ -72,7 +80,7 @@ func ClockInOutEmployee(id string) bool {
 
 		var kept []string
 		var employeeRec []string
-		for {
+		for currentRecords {
 			line, err := nextFInOutDay()
 			if err == io.EOF {
 				break
@@ -80,7 +88,7 @@ func ClockInOutEmployee(id string) bool {
 
 			if err != nil {
 				fmt.Fprintln(os.Stderr, "clock in/out - reading file error: clock_inout", err)
-				break
+				return false
 			}
 
 			// parse

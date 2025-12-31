@@ -36,3 +36,21 @@ func ParseDateString(s string) (time.Time, error) {
 		fmt.Println("This date has already passed!")
 	}
 */
+
+func ParseMonthYear(dateStr string) (year, month int, err error) {
+    formats := []string{
+        "01/2006",
+        "2006/01",
+        "1/2006",
+        "2006/1",
+    }
+
+    for _, format := range formats {
+        t, err := time.Parse(format, dateStr)
+        if err == nil {
+            return t.Year(), int(t.Month()), nil
+        }
+    }
+
+    return 0, 0, fmt.Errorf("unable to parse date: %s", dateStr)
+}
