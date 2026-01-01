@@ -13,15 +13,14 @@ import (
 	"payroll/models"
 )
 
-func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
+func DisplayPayroll(date string, employeePayroll *[]models.Payroll) error {
 	// contains the employee id as a key and the list of employee logs as a value
 	attendance := make(map[string][]string)
 
 	// extract year and month from a string
 	year, month, err := utils.ParseMonthYear(date)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error: ", err)
-		return
+		return fmt.Errorf("%s\n", err)
 	}
 
 	// logs.txt contains all the logs, but it is not efficient because 
@@ -29,8 +28,7 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 	// file is not a good idea; however, this is just a practice thing of mine
 	next, close, err := utils.ReadFile("data/clock_inout/logs.txt")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error: opening file error at DisplayPayroll", err)
-		return
+		return fmt.Errorf("opening file error at DisplayPayroll: %s\n", err)
 	}
 	defer close()
 
@@ -42,8 +40,8 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 		}
 
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error: reading file content at DisplayPayroll - all", err)
-			return // abort this process
+			// abort this process
+			return fmt.Errorf("reading file content at DisplayPayroll - all %s\n", err)
 		}
 		
 		line = strings.TrimSpace(line)
@@ -58,16 +56,14 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 			}
 			
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "Error: reading file content at DisplayPayroll - date", err)
-				return
+				return fmt.Errorf("reading file content at DisplayPayroll - date %s\n", err)
 			}
 
 			// convert a string to a date object
 			// this date came from logs.txt to compare with the input date
 			t, err := utils.ParseDateString(strings.TrimSpace(lineDate))
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "Invalid date: ", err)
-				return
+				return fmt.Errorf("Invalid date: %s\n", err)
 			}
 
 			// filtering
@@ -99,6 +95,12 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 			attendance[employeedId] = append(attendance[employeedId], attTime) // save in/out logs with id in a map
 		}
 	}
+
+	/*
+		After extracting employee logs based on the input date and storing 
+		them in a map, the next thing is to calculate the hours worked and 
+		the gross income, and save the data to employeePayroll slice.
+	*/
 
 	employees := make(map[string]*models.Employee)
 	getEmployees(employees)
@@ -139,6 +141,8 @@ func DisplayPayroll(date string, employeePayroll *[]models.Payroll) {
 			GrossIncome: grossIncome,
 		})
 	}
+
+	return nil
 }
 
 func calculateHoursWorked(log string) (float64, error) {

@@ -33,6 +33,9 @@ func AdminMenu(scanner *bufio.Scanner) {
 		case "3":
 			utils.ClearScreen()
 			CalcPayroll(scanner)
+		case "4":
+			utils.ClearScreen()
+			GenReport(scanner)
 		case "5":
 			fmt.Println("\nBye bye! 👋")
 			return

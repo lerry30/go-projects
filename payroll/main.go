@@ -34,13 +34,21 @@ func main() {
 			views.ClockInOut(scanner)
 		case "2":
 			utils.ClearScreen()
-			views.AdminMenu(scanner)
+			// ADMIN AUTHENTICATION
+			isAdmin := views.VerifyCred(scanner)
+
+			if isAdmin {
+				views.AdminMenu(scanner)
+			} else {
+				fmt.Println("Invalid credential.")
+				utils.WaitToPressEnter(scanner)	
+			}
 		case "3":
 			fmt.Println("\nBye bye! 👋")
 			return
 		default:
 			fmt.Println("\nUndefined input. Please try again.")
-			utils.WaitToPressEnter(scanner)		
+			utils.WaitToPressEnter(scanner)	
 		}
 	}
 }

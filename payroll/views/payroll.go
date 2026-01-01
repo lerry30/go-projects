@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"bufio"
 	"strings"
+	"os"
 	
 	"payroll/utils"
 	"payroll/controllers"
@@ -14,7 +15,6 @@ import (
 	
 */
 func CalcPayroll(scanner *bufio.Scanner) {
-
 	for {
 		utils.ClearScreen()
 		fmt.Print("\n")
@@ -33,7 +33,11 @@ func CalcPayroll(scanner *bufio.Scanner) {
 		}
 
 		var employeePayroll []models.Payroll
-		controllers.DisplayPayroll(dateInput, &employeePayroll)
+		if err := controllers.DisplayPayroll(dateInput, &employeePayroll); err != nil {
+			fmt.Fprintln(os.Stderr, "Error:", err)
+			utils.WaitToPressEnter(scanner)
+			continue
+		}
 
 		//fmt.Printf("|    ID    |      Name    |     Position    |     Hours     |       OT        |        Gross Income     |\n")
 
@@ -54,7 +58,7 @@ func CalcPayroll(scanner *bufio.Scanner) {
 			fmt.Printf("Position: %s\n", position)
 			fmt.Printf("Hours: %.2f\n", totalHoursWorked)
 			fmt.Printf("OT: %.2f\n", totalOT)
-			fmt.Printf("Gross Income: ₱ %.2f\n", grossIncome)
+			fmt.Printf("Gross Income: $ %.2f\n", grossIncome)
 			fmt.Println()
 
 			fmt.Println(strings.Repeat("=", 60))
