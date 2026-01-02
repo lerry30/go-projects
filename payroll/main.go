@@ -6,6 +6,7 @@ import (
 	"time"
 	"os"
 	"bufio"
+	"strings"
 
 	"payroll/utils"
 	"payroll/views"
@@ -26,7 +27,7 @@ func main() {
 		fmt.Print("\nEnter your choice [1-3]: ")
 
 		scanner.Scan()
-		choice := scanner.Text()
+		choice := strings.TrimSpace(scanner.Text())
 
 		switch choice {
 		case "1":

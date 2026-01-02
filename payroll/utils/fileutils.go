@@ -74,7 +74,7 @@ func ReadFile(fileName string) (func() (string, error), func() error, error) {
 	// O_RDONLY: read only
     // O_CREATE: create if doesn't exist
     // 0644: standard permissions for new files
-	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0o644)
+	file, err := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, nil, err
 	}
