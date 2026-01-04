@@ -5,6 +5,12 @@
       "name": "Lerry Samson",
       "email": "johnlerryramossamson@gmail.com",
       "phone": "09123456789"
+    },
+    {
+      "id": 4,
+      "name": "Trevcy",
+      "email": "trev@gmail.com",
+      "phone": "09828827942"
     }
   ]
 }

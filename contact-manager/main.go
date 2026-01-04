@@ -36,9 +36,12 @@ func main() {
 		case "1":
 			views.AddContact(&book, scanner)
 		case "2":
+			fmt.Println()
 			book.DisplayContacts()
 		case "3":
 			views.SearchContact(&book, scanner)
+		case "4":
+			views.DeleteContact(&book, scanner)
 		case "5":
 			fmt.Println("\nBye bye! 👋")
 			return

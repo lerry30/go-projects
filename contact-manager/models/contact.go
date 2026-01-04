@@ -26,7 +26,7 @@ func (cb *ContactBook) AddContact(c Contact) {
 
 func (cb *ContactBook) DisplayContacts() {
 	for _, c := range cb.Contacts {
-		fmt.Printf("ID: %d | Name: %s | Email: %s | Phone: %s", 
+		fmt.Printf("ID: %d | Name: %s | Email: %s | Phone: %s\n", 
 			c.ID, c.Name, c.Email, c.Phone)
 	}
 }
