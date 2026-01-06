@@ -1,0 +1,12 @@
+{
+  "todos": [
+    {
+      "task": "Work out",
+      "completed": false
+    },
+    {
+      "task": "Code an entire app",
+      "completed": false
+    }
+  ]
+}
