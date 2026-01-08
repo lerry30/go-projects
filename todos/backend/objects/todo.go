@@ -54,7 +54,7 @@ func (tl *TodoList) Load() error {
 }
 
 func (tl *TodoList) NewTodo(w http.ResponseWriter, r *http.Request) {
-	newTodo, err := routes.NewTodo(w, r)
+	newTodo, err := routes.NewTodo(&tl.Todos, w, r)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		return
@@ -68,6 +68,25 @@ func (tl *TodoList) GetTodos(w http.ResponseWriter, r *http.Request) {
 	err := routes.GetTodos(&tl.Todos, w, r)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
+	}
+}
+
+func (tl *TodoList) SetTodoStatus(w http.ResponseWriter, r *http.Request) {
+	err := routes.SetTodoStatus(&tl.Todos, w, r)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
 		return
 	}
+
+	tl.Save()
+}
+
+func (tl *TodoList) RemoveTodo(w http.ResponseWriter, r *http.Request) {
+	err := routes.RemoveTodo(&tl.Todos, w, r)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		return
+	}
+
+	tl.Save()
 }

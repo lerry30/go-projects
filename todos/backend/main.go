@@ -14,6 +14,8 @@ func main() {
 
 	http.HandleFunc("/newtask", todoList.NewTodo)
 	http.HandleFunc("/todos", todoList.GetTodos)
+	http.HandleFunc("/status", todoList.SetTodoStatus)
+	http.HandleFunc("/remove", todoList.RemoveTodo)
 
 	fmt.Println("Server starting on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
