@@ -44,7 +44,7 @@ func NewTodo(todos *[]models.Todo, w http.ResponseWriter, r *http.Request) (mode
 
 	id := 1
 	if len(*todos) > 0 {
-		id = (*todos)[len(*todos)-1].ID
+		id = (*todos)[len(*todos)-1].ID + 1
 	}
 	newTask.ID = id
 	newTask.Completed = false

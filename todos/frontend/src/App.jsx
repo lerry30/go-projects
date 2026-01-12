@@ -25,17 +25,17 @@ const App = () => {
         setModalMessage({title: 'Awesome', message: response?.message});
       }
     } catch(error) {
-      setErrorMessage(error?.message)
+      setErrorMessage(error?.message);
     } finally {
-      setTask('')
+      setTask('');
     }
   }
 
   const getTodos = async () => {
     try {
       const data = await getData(`${urlPath}/todos`);
-      if(data?.length > 0) {
-        setTodos(data)
+      if(Array.isArray(data)) {
+        setTodos(data.reverse());
       }
     } catch(error) {
       console.log('No todos.');
@@ -94,7 +94,7 @@ const App = () => {
           <button 
             id="submit-task"
             onClick={submitNewTask}
-            className="bg-black text-white w-full max-w-[400px] outline-none rounded-lg py-2 px-4"
+            className="bg-black text-white w-full max-w-[400px] outline-none rounded-lg py-2 px-4 cursor-pointer"
           >
             Submit
           </button>
@@ -115,17 +115,21 @@ const App = () => {
         <div className="w-full">
           {
             todos.map((todo, index) => (
-              <div key={index} className="flex justify-between items-center my-2">
+              <div 
+                key={index} 
+                className="flex justify-between items-center my-2 bg-slate-500 p-2 rounded-sm"
+              >
                 <div className="flex items-center gap-4">
                   <input 
                     type="checkbox" 
                     checked={todo.completed}
                     onChange={() => updateTodo(todo?.id, todo?.completed)}
-                    className="w-6 h-6"
+                    className="w-6 h-6 cursor-pointer"
                   />
                   <p className="text-white text-xl">{todo.task}</p>
                 </div>
                 <button 
+                  className="cursor-pointer"
                   onClick={() => removeTodo(todo?.id)}
                 >
                   <Trash2 className="text-red-400" />
