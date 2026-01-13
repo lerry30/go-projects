@@ -88,6 +88,7 @@ const App = () => {
             id="task" 
             value={task} 
             onChange={elem => setTask(elem.target?.value)}
+            onKeyDown={e => e.key === 'Enter' && submitNewTask()}
             className="w-full max-w-[400px] outline-none border-2 border-neutral-400 rounded-lg py-2 px-4"
             placeholder="Add new todo"
           />
