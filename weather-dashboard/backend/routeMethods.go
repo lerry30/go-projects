@@ -70,7 +70,7 @@ func (apiServer *APIServer) SearchCity(w http.ResponseWriter, r *http.Request) e
 	}
 
 	// wd has all the necessary fields needed to be filled by GetCurrent
-	var wd WeatherData
+	var wd models.WeatherData
 	// ow is a struct for external API requests
 	// GetCurrent gives the weather update for a specific city
 	wd, err := ow.GetCurrent(city)
