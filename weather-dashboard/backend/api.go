@@ -41,6 +41,7 @@ func (apiServer *APIServer) Run() {
 
 	router.HandleFunc("/filter/{city}", makeHTTPHandleFunc(apiServer.FilterCity)).Methods("GET")
 	router.HandleFunc("/search/{city}", makeHTTPHandleFunc(apiServer.SearchCity)).Methods("GET")
+	router.HandleFunc("/forecast/{city}", makeHTTPHandleFunc(apiServer.Forecast)).Methods("GET")
 
 	fmt.Println("Server starting on port:", apiServer.port[1:])
 	log.Fatal(http.ListenAndServe(apiServer.port, router))

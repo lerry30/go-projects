@@ -29,32 +29,62 @@ func NewOpenWeather(id, key string) *OpenWeather {
 	}
 }
 
-func (ow *OpenWeather) GetCurrent(city string) (models.WeatherData, error) {
-	url := fmt.Sprintf("%s/weather?q=%s&appid=%s&units=matric", ow.baseUrl, city, ow.apiKey)
+func (ow *OpenWeather) GetCurrent(city string) (models.CurrentWeatherData, error) {
+	url := fmt.Sprintf("%s/weather?q=%s&appid=%s&units=metric", ow.baseUrl, city, ow.apiKey)
 
 	resp, err := ow.httpClient.Get(url)
 	if err != nil {
-		return models.WeatherData{}, err
+		return models.CurrentWeatherData{}, err
 	}
 
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return models.WeatherData{}, fmt.Errorf("openweather error: %s", resp.Status)
+		return models.CurrentWeatherData{}, fmt.Errorf("openweather error: %s", resp.Status)
 	}
 
-	var data models.RawWeatherData
+	var data models.RawCurrentWeatherData
 
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return models.WeatherData{}, err
+		return models.CurrentWeatherData{}, err
 	}
 
 	if len(data.Weather) == 0 {
-		return models.WeatherData{}, fmt.Errorf("No weather data")
+		return models.CurrentWeatherData{}, fmt.Errorf("No weather data.")
 	}
 
-	wd := models.NewWeatherData()
-	wd.TransformWeatherValues(&data)
+	wd := models.NewCurrentWeatherData()
+	wd.TransformCurrentWeatherValues(&data)
 
 	return *wd, nil
+}
+
+func (ow *OpenWeather) GetForecast(city string) (models.ForecastWeatherData, error) {
+	url := fmt.Sprintf("%s/forecast?q=%s&appid=%s&units=metric", ow.baseUrl, city, ow.apiKey)
+
+	resp, err := ow.httpClient.Get(url)
+	if err != nil {
+		return models.ForecastWeatherData{}, fmt.Errorf("openweather error: %s.", err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return models.ForecastWeatherData{}, fmt.Errorf("failed to get weather forecast.")
+	}
+
+	var data models.RawForecastWeatherData
+
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		return models.ForecastWeatherData{}, fmt.Errorf("No weather data.")
+	}
+
+	if data.COD != "200" || len(data.List) == 0 {
+		return models.ForecastWeatherData{}, fmt.Errorf("No weather data.")
+	}
+
+	fw := models.NewForecastWeatherData()
+	fw.TransformForecastWeatherValues(&data)
+
+	return *fw, nil
 }
