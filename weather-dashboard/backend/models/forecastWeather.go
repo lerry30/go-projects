@@ -24,8 +24,13 @@ type WeatherForecastThreeHourInterval struct {
 	Visibility string `json:"visibility"`
 	ChanceOfRainOrSnow string `json:"chance_of_rain_or_snow"`
 	PartOfDay string `json:"part_of_day"`
-	DateTime string `json:"date_time"`
-	Hour string `json:"hour"`
+	DateTimeGMT string `json:"date_time"`
+	LocalDateTime time.Time `json:"local_date_time"`
+}
+
+type WeatherForecastWeekDay struct {
+	WeekDay string `json:"weekday"`
+	HourWeatherUpdates []WeatherForecastThreeHourInterval `json:"hour_weather_updates"`
 }
 
 type ForecastWeatherData struct {
@@ -33,7 +38,7 @@ type ForecastWeatherData struct {
 	Country string `json:"country"`
 	Sunrise time.Time `json:"sunrise"`
 	Sunset time.Time `json:"sunset"`
-	List map[string][]WeatherForecastThreeHourInterval `json:"list"`
+	List []WeatherForecastWeekDay `json:"list"`
 }
 
 func NewForecastWeatherData() *ForecastWeatherData {
@@ -54,7 +59,7 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 	fw.Sunrise = sunrise
 	fw.Sunset = sunset
 
-	fw.List = make(map[string][]WeatherForecastThreeHourInterval)
+	fw.List = []WeatherForecastWeekDay{}
 
 	noOfDays := 5
 	var totalNumberOfReports int = raw.CNT
@@ -62,16 +67,35 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 
 	var key string
 	for i, item := range raw.List {
-		// datetime
+		// local datetime
 		dt := utils.ToLocalTime(item.DT, timezone)
 
-		// gen map key
+		// gen weekday as key
 		if i%noOfReports == 0 {
 			key = dt.Weekday().String()
 		}
 
+		var weekDay *WeatherForecastWeekDay // pointer, initialize nil by default
+
+		for i, wd := range fw.List {
+			if wd.WeekDay == key {
+				weekDay = &fw.List[i]
+				break
+			}
+		}
+
+		if weekDay == nil {
+			newWeekDay := WeatherForecastWeekDay{
+				WeekDay: key,
+				HourWeatherUpdates: []WeatherForecastThreeHourInterval{},
+			}
+
+			fw.List = append(fw.List, newWeekDay)
+			weekDay = &newWeekDay
+		}
+
 		if len(item.Weather) == 0 {
-			fw.List[key] = append(fw.List[key], WeatherForecastThreeHourInterval{})
+			weekDay.HourWeatherUpdates = append(weekDay.HourWeatherUpdates, WeatherForecastThreeHourInterval{})
 			continue
 		}
 
@@ -96,11 +120,9 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 		if item.Sys.Pod == "n" {
 			pod = "night"
 		}
-
-		hour := dt.Format("03 pm")
 		// ---
 
-		fw.List[key] = append(fw.List[key], WeatherForecastThreeHourInterval{
+		weekDay.HourWeatherUpdates = append(weekDay.HourWeatherUpdates, WeatherForecastThreeHourInterval{
 			Temp: temp,
 			FeelsLike: feelsLike,
 			Humidity: humidity,
@@ -113,8 +135,8 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 			Visibility: visibility,
 			ChanceOfRainOrSnow: pop,
 			PartOfDay: pod,
-			DateTime: item.DT_Txt,
-			Hour: hour,
+			DateTimeGMT: item.DT_Txt, // GMT: ref time
+			LocalDateTime: dt,
 		})
 	}
 }
