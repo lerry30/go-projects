@@ -77,6 +77,8 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 
 		var weekDay *WeatherForecastWeekDay // pointer, initialize nil by default
 
+		// search through the list if the key exists
+		// if it does, the pointer for that will be assigned to weekDay
 		for i, wd := range fw.List {
 			if wd.WeekDay == key {
 				weekDay = &fw.List[i]
@@ -84,12 +86,15 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 			}
 		}
 
+		// if the key is not found in the list, this block will initialize a new
+		// instance of WeatherForecastWeekDay for that key and its values.
 		if weekDay == nil {
 			newWeekDay := WeatherForecastWeekDay{
 				WeekDay: key,
 				HourWeatherUpdates: []WeatherForecastThreeHourInterval{},
 			}
 
+			// assign an empty struct
 			fw.List = append(fw.List, newWeekDay)
 			weekDay = &newWeekDay
 		}
@@ -122,6 +127,7 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 		}
 		// ---
 
+		// appending to *WeatherForecastThreeHourInterval
 		weekDay.HourWeatherUpdates = append(weekDay.HourWeatherUpdates, WeatherForecastThreeHourInterval{
 			Temp: temp,
 			FeelsLike: feelsLike,
