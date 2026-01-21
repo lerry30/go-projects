@@ -127,7 +127,7 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 		}
 		// ---
 
-		// appending to *WeatherForecastThreeHourInterval
+		// append a new item to *WeatherForecastWeekDay
 		weekDay.HourWeatherUpdates = append(weekDay.HourWeatherUpdates, WeatherForecastThreeHourInterval{
 			Temp: temp,
 			FeelsLike: feelsLike,
