@@ -8,11 +8,11 @@ export const zForecast = create(
             country: '',
             sunrise: null,
             sunset: null,
-            list: {},
+            list: [],
 
             setWeatherForecast: (cityName, country, sunrise, sunset, list) => {
                 if(!cityName || !country) return;
-                if(!list || Object.keys(list).length === 0) return;
+                if(!list || list?.length === 0) return;
                 set((state) => ({ cityName, country, sunrise, sunset, list }));
             },
         }), {

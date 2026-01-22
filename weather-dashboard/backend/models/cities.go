@@ -26,7 +26,7 @@ type Cities struct {
 	Records []Record `json:"RECORDS"`
 }
 
-var filepath = "cities/owm_city_list.json"
+var filepath = "files/owm_city_list.json"
 
 func (c *Cities) Load() error {
 	data, err := os.ReadFile(filepath)

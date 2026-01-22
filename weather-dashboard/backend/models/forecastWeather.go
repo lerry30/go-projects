@@ -61,19 +61,10 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 
 	fw.List = []WeatherForecastWeekDay{}
 
-	noOfDays := 5
-	var totalNumberOfReports int = raw.CNT
-	noOfReports := totalNumberOfReports / noOfDays
-
-	var key string
 	for i, item := range raw.List {
 		// local datetime
 		dt := utils.ToLocalTime(item.DT, timezone)
-
-		// gen weekday as key
-		if i%noOfReports == 0 {
-			key = dt.Weekday().String()
-		}
+		key := dt.Weekday().String()
 
 		var weekDay *WeatherForecastWeekDay // pointer, initialize nil by default
 
@@ -110,7 +101,7 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 		humidity := fmt.Sprintf("%d%%", item.Main.Humidity)
 		pressure := fmt.Sprintf("%d%% hPa", item.Main.Pressure)
 
-		icon := fmt.Sprintf("http://openweathermap.org/img/w/%s", item.Weather[0].Icon)
+		icon := fmt.Sprintf("https://openweathermap.org/img/w/%s.png", item.Weather[0].Icon)
 
 		clouds := fmt.Sprintf("%d%%", item.Clouds.All)
 		
