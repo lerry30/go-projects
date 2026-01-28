@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 import { zForecast } from '../store/weather-forecast';
+import { zWeatherForecastHourIndex } from '../store/wf-hour-index';
+
+import { formattedDateAndTime } from '../utils/datetime';
+
+import TitleFormat from '../utils/titleFormat';
+import WeatherForecastChart from './weatherChart';
 
 const Main = () => {
     const zForecastCityName = zForecast(state => state.cityName);
@@ -8,31 +14,129 @@ const Main = () => {
     const zForecastSunset = zForecast(state => state.sunset);
     const zForecastList = zForecast(state => state.list);
 
-    useEffect(() => {
+    const zWFHourIndex = zWeatherForecastHourIndex(state => state.index);
+    const zSetIndex = zWeatherForecastHourIndex(state => state?.setIndex);
 
-    }, []);
+    const [ selectedDay, setSelectedDay ] = useState({});
+
+    const repDayList = zForecastList.map(day => day.hour_weather_updates.length);
+
+    useEffect(() => {
+        let hIndex = zWFHourIndex;
+        let dIndex = 0;
+        for(let i = 0; i < repDayList.length; i++) {
+            const d = hIndex - repDayList[i];
+            if(d < 0) {
+                dIndex = i;
+                break;
+            }
+            hIndex = d;
+        }
+        setSelectedDay(zForecastList[dIndex].hour_weather_updates[hIndex]);
+    }, [zWFHourIndex]);
 
     return (
-        <main className="w-[70%] h-full bg-red-300 overflow-hidden rounded-tr-lg rounded-br-lg p-4">
-            <div className="bg-red-400 p-2">
-                <span className="text-xl">{zForecastCityName} City, {zForecastCountry}</span>
+        <main 
+            className="sm:w-full lg:w-[80%] 
+                h-full bg-gray-700 overflow-y-auto p-4 flex flex-col gap-2
+                sm:rounded-bl-lg sm:rounded-br-lg lg:rounded-bl-none lg:rounded-tr-lg
+            "
+        >
+            <div className="font-sans bg-gray-900 text-white p-4 flex justify-between rounded-xl shadow-sm">
+                <span>{zForecastCityName} City, {zForecastCountry}</span>
+                <span>{formattedDateAndTime(new Date())}</span>
             </div>
-            <div className="bg-blue-400 px-2 py-6">
+
+            <div className="bg-gray-900 text-white p-6 flex flex-col rounded-xl shadow-sm">
                 <span className="text-sm">Weather Forecast</span>
+                <article className="flex justify-between">
+                    <span className="font-sans text-5xl">{TitleFormat(selectedDay?.description)}</span>
+                    <div className="text-right">
+                        <div>
+                            <span className="text-white/75">Precipitation:&nbsp;</span>
+                            <span>{selectedDay?.chance_of_rain_or_snow}</span>
+                        </div>
+                        <div>
+                            <span className="text-white/75">Humidity:&nbsp;</span>
+                            <span>{selectedDay?.humidity}</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article className="flex justify-between">
+                    <div className="flex items-center gap-2">
+                        <img src={selectedDay?.icon} alt="" />
+                        <p>
+                            <span className="mr-2">
+                                {formattedDateAndTime(new Date(selectedDay?.local_date_time))}
+                            </span>
+                            <span>
+                                {new Date(selectedDay?.local_date_time).toLocaleDateString('en-US', {weekday: 'short'})}
+                            </span>
+                        </p>
+                    </div>
+                    <div>
+                        <span className="text-white/75">Wind:&nbsp;</span>
+                        <span>{selectedDay?.wind_speed}</span>
+                    </div>
+                </article>
+
+                <article>
+                    <span className="font-sans text-lg text-white/75">
+                        Temperature:&nbsp;
+                    </span>
+                    <span className="font-sans text-2xl">
+                        {selectedDay?.temp}
+                    </span>
+                </article>
+                <article>
+                    <span className="font-sans text-lg text-white/75">
+                        Feels Like:&nbsp;
+                    </span>
+                    <span className="font-sans text-2xl">
+                        {selectedDay?.feels_like}
+                    </span>
+                </article>
             </div>
-            <div className="">
+
+            <div>
+                <WeatherForecastChart weatherList={zForecastList}  />
+            </div>
+
+            <div className="w-full flex gap-2">
                 {
-                    zForecastList.map((fc, i) => {
-                        const updates = fc?.hour_weather_updates[0];
+                    zForecastList.map((wf, i) => {
+                        if(i >= 5) return null;
+
+                        const fHForecast = zForecastList[0]?.hour_weather_updates?.length;
+                        const fWI = wf?.hour_weather_updates?.length - fHForecast;
+                        const updates = wf?.hour_weather_updates[fWI];
+                        const dt = new Date(updates?.local_date_time);
 
                         return (
-                            <div key={i}>
-                                <span>{fc?.weekday}</span>
-                                <img src={updates.icon} alt="Weather Icon" />
+                            <div 
+                                key={i}
+                                className="w-full flex flex-col justify-center items-center p-4 cursor-pointer bg-gray-900 text-white rounded-lg shadow-sm"
+                                onClick={() => setSelectedDay(updates)}
+                            >
+                                <span className="font-light font-sans text-2xl mb-2">{wf?.weekday}</span>
+                                <img src={updates.icon} alt="Weather Icon" className="mb-2" />
+                                <p className="font-sans font-semibold">{dt.toLocaleString('en-US', {hour: 'numeric', hour12: true})}</p>
                             </div>
                         )
                     })
                 }
+            </div>
+
+            <div className="text-sm text-white flex justify-between mt-auto pt-4 border-t border-gray-200">
+                <div>
+                    <span className="font-medium">Sunrise:&nbsp;</span>
+                    {new Date(zForecastSunrise).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                </div>
+                <div>
+                    <span className="font-medium">Sunset:&nbsp;</span>
+                    {new Date(zForecastSunset).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                </div>
             </div>
         </main>
     )

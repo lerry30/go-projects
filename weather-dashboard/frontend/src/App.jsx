@@ -12,7 +12,7 @@ function App() {
 	}, []);
 
 	return (
-		<div className="h-screen max-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center p-4">
+		<div className="h-screen max-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center p-4 sm:flex-col lg:flex-row">
 			<Sidebar />
 			<Main />
 		</div>

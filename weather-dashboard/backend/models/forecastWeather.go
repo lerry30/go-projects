@@ -61,7 +61,7 @@ func (fw *ForecastWeatherData) TransformForecastWeatherValues(raw *RawForecastWe
 
 	fw.List = []WeatherForecastWeekDay{}
 
-	for i, item := range raw.List {
+	for _, item := range raw.List {
 		// local datetime
 		dt := utils.ToLocalTime(item.DT, timezone)
 		key := dt.Weekday().String()
