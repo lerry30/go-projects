@@ -6,6 +6,8 @@ import { formattedDateAndTime } from '../utils/datetime';
 
 import TitleFormat from '../utils/titleFormat';
 import WeatherForecastChart from './weatherChart';
+import Tooltip from './tooltip';
+import SaveCity from './saveCity';
 
 const Main = () => {
     const zForecastCityName = zForecast(state => state.cityName);
@@ -15,13 +17,14 @@ const Main = () => {
     const zForecastList = zForecast(state => state.list);
 
     const zWFHourIndex = zWeatherForecastHourIndex(state => state.index);
-    const zSetIndex = zWeatherForecastHourIndex(state => state?.setIndex);
+    //const zSetIndex = zWeatherForecastHourIndex(state => state?.setIndex);
 
     const [ selectedDay, setSelectedDay ] = useState({});
 
     const repDayList = zForecastList.map(day => day.hour_weather_updates.length);
 
     useEffect(() => {
+        if(zForecastList.length === 0) return;
         let hIndex = zWFHourIndex;
         let dIndex = 0;
         for(let i = 0; i < repDayList.length; i++) {
@@ -33,7 +36,7 @@ const Main = () => {
             hIndex = d;
         }
         setSelectedDay(zForecastList[dIndex].hour_weather_updates[hIndex]);
-    }, [zWFHourIndex]);
+    }, [zWFHourIndex, zForecastList]);
 
     return (
         <main 
@@ -44,7 +47,14 @@ const Main = () => {
         >
             <div className="font-sans bg-gray-900 text-white p-4 flex justify-between rounded-xl shadow-sm">
                 <span>{zForecastCityName} City, {zForecastCountry}</span>
-                <span>{formattedDateAndTime(new Date())}</span>
+                <div className="flex justify-center items-center gap-4">
+                    <span>{formattedDateAndTime(new Date())}</span>
+                    <button>
+                        <Tooltip text="save city">
+                            <SaveCity city={zForecastCityName} />
+                        </Tooltip>
+                    </button>
+                </div>
             </div>
 
             <div className="bg-gray-900 text-white p-6 flex flex-col rounded-xl shadow-sm">
