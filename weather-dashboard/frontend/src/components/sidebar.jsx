@@ -5,11 +5,11 @@ import { getData } from '../utils/send';
 import { zServer } from '../store/server';
 import { zForecast } from '../store/weather-forecast';
 
-const dummy = {};
+import FaveCities from './faveCities';
 
 const Sidebar = () => {
     const zServerUrl = zServer(state => state.serverUrl);
-    const zSetWeatherForecastData = zForecast(state => state.setWeatherForecast);
+    const zFetchWeatherForecast = zForecast(state => state.fetchWeatherForecast);
 
     // Using useRef to avoid unnecessary re-renders
     const cityInputField = useRef(null);
@@ -56,25 +56,7 @@ const Sidebar = () => {
             }
             
             setIsSuggestionOpen(false);
-
-            //zSetWeatherForecastData(
-            //    dummy.city_name,
-            //    dummy.country,
-            //    dummy.sunrise,
-            //    dummy.sunset,
-            //    dummy.list,
-            //);
-
-            const response = await getData(`${zServerUrl}/forecast/${city}`);
-            if(response) {
-                zSetWeatherForecastData(
-                    response?.city_name,
-                    response?.country,
-                    new Date(response?.sunrise),
-                    new Date(response?.sunset),
-                    response?.list
-                );
-            }
+            await zFetchWeatherForecast(zServerUrl, city);
         } catch(error) {
             console.log(error);
         }
@@ -101,14 +83,19 @@ const Sidebar = () => {
     return (
         <aside 
             className="sm:w-full lg:w-[20%] 
-                h-full bg-gray-700 overflow-hidden p-4 border-r border-gray-300/20
+                h-full bg-gray-700 overflow-hidden p-4 border-r border-gray-300/20 flex flex-col gap-4
                 sm:rounded-tl-lg sm:rounded-tr-lg lg:rounded-tr-none lg:rounded-bl-lg
             "
         >
-            <div className={`w-full bg-slate-300 flex py-3 px-4 relative ${isSuggestionOpen ? "rounded-t-xl" : "rounded-xl"}`}>
+            <div 
+                className={
+                    `w-full h-12 bg-slate-300 flex items-center py-3 px-4 relative 
+                    ${isSuggestionOpen ? "rounded-t-xl" : "rounded-xl"}`
+                }
+            >
                 <input
                     ref={cityInputField}
-                    className="w-full outline-0 font-sans"
+                    className="w-full h-6 outline-0 font-sans"
                     placeholder="Search city"
                     onChange={elem => openSuggestion(elem.target.value)}
                     onKeyDown={e => e.key === "Enter" && getWeatherForecast(e.target.value)}
@@ -116,8 +103,8 @@ const Sidebar = () => {
                 <Search />
                 <BoxSuggestion />
             </div>
-            <div className="">
-
+            <div className="w-full h-full flex flex-col justify-end">
+                <FaveCities />
             </div>
         </aside>
     )

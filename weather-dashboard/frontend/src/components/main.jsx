@@ -46,7 +46,7 @@ const Main = () => {
             "
         >
             <div className="font-sans bg-gray-900 text-white p-4 flex justify-between rounded-xl shadow-sm">
-                <span>{zForecastCityName} City, {zForecastCountry}</span>
+                <span>{zForecastCityName}, {zForecastCountry}</span>
                 <div className="flex justify-center items-center gap-4">
                     <span>{formattedDateAndTime(new Date())}</span>
                     <button>

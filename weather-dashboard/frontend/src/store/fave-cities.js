@@ -23,7 +23,6 @@ export const zFaveCities = create(
         isSaved: (name) => {
             name = String(name).trim().toLowerCase();
             if(!name) return false;
-            console.log(get.cities);
             return get().cities?.includes(name) || false;
         },
     }), {

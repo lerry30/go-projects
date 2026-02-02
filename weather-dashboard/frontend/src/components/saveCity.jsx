@@ -29,7 +29,7 @@ const SaveCity = ({city}) => {
 
     return (
         <Heart 
-            fill={`${saved ? '#f00' : 'none'}`}
+            fill={`${saved ? '#b11' : 'none'}`}
             stroke={`${saved ? 'none' : 'white'}`}
             onClick={save} 
         />
