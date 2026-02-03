@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 	"net/http"
+	"net/url"
 	"encoding/json"
 
 	"backend/models"
@@ -30,6 +31,7 @@ func NewOpenWeather(id, key string) *OpenWeather {
 }
 
 func (ow *OpenWeather) GetCurrent(city string) (models.CurrentWeatherData, error) {
+	city = url.QueryEscape(city)
 	url := fmt.Sprintf("%s/weather?q=%s&appid=%s&units=metric", ow.baseUrl, city, ow.apiKey)
 
 	resp, err := ow.httpClient.Get(url)
@@ -60,17 +62,20 @@ func (ow *OpenWeather) GetCurrent(city string) (models.CurrentWeatherData, error
 }
 
 func (ow *OpenWeather) GetForecast(city string) (models.ForecastWeatherData, error) {
+	city = url.QueryEscape(city)
 	url := fmt.Sprintf("%s/forecast?q=%s&appid=%s&units=metric", ow.baseUrl, city, ow.apiKey)
 
 	resp, err := ow.httpClient.Get(url)
 	if err != nil {
-		return models.ForecastWeatherData{}, fmt.Errorf("openweather error: %s.", err)
+		return models.ForecastWeatherData{}, fmt.Errorf("openweather error: %s. City: %s", err, city)
 	}
 
 	defer resp.Body.Close()
 
+	fmt.Println(url)
+
 	if resp.StatusCode != http.StatusOK {
-		return models.ForecastWeatherData{}, fmt.Errorf("failed to get weather forecast.")
+		return models.ForecastWeatherData{}, fmt.Errorf("failed to get weather forecast for %s.", city)
 	}
 
 	var data models.RawForecastWeatherData
