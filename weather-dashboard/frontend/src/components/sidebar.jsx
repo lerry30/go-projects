@@ -82,9 +82,9 @@ const Sidebar = () => {
 
     return (
         <aside 
-            className="sm:w-full lg:w-[20%] 
-                h-full bg-gray-700 overflow-hidden p-4 border-r border-gray-300/20 flex flex-col gap-4
-                sm:rounded-tl-lg sm:rounded-tr-lg lg:rounded-tr-none lg:rounded-bl-lg
+            className="w-full lg:w-[20%] lg:h-full
+                bg-gray-700 overflow-hidden p-4 border-r border-gray-300/20 flex flex-col gap-4
+                rounded-tl-lg rounded-tr-lg lg:rounded-tr-none lg:rounded-bl-lg
             "
         >
             <div 
@@ -103,7 +103,10 @@ const Sidebar = () => {
                 <Search />
                 <BoxSuggestion />
             </div>
-            <div className="w-full h-full flex flex-col justify-end">
+            <div 
+                className="w-full h-full 
+                    hidden lg:flex flex-col justify-end"
+            >
                 <FaveCities />
             </div>
         </aside>

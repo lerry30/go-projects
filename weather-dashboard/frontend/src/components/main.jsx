@@ -40,14 +40,14 @@ const Main = () => {
 
     return (
         <main 
-            className="sm:w-full lg:w-[80%] 
+            className="w-full lg:w-[80%] 
                 h-full bg-gray-700 overflow-y-auto p-4 flex flex-col gap-2
-                sm:rounded-bl-lg sm:rounded-br-lg lg:rounded-bl-none lg:rounded-tr-lg
+                lg:rounded-bl-none lg:rounded-tr-lg
             "
         >
-            <div className="font-sans bg-gray-900 text-white p-4 flex justify-between rounded-xl shadow-sm">
+            <div className="font-sans bg-gray-900 text-white p-4 flex justify-between rounded-xl shadow-sm flex-col-reverse sm:flex-row">
                 <span>{zForecastCityName}, {zForecastCountry}</span>
-                <div className="flex justify-center items-center gap-4">
+                <div className="w-full flex items-center gap-4 justify-between sm:justify-center sm:w-fit">
                     <span>{formattedDateAndTime(new Date())}</span>
                     <button>
                         <Tooltip text="save city">
@@ -59,9 +59,9 @@ const Main = () => {
 
             <div className="bg-gray-900 text-white p-6 flex flex-col rounded-xl shadow-sm">
                 <span className="text-sm">Weather Forecast</span>
-                <article className="flex justify-between">
+                <article className="flex justify-between flex-col md:flex-row">
                     <span className="font-sans text-5xl">{TitleFormat(selectedDay?.description)}</span>
-                    <div className="text-right">
+                    <div className="md:text-right mt-2 md:mt-0">
                         <div>
                             <span className="text-white/75">Precipitation:&nbsp;</span>
                             <span>{selectedDay?.chance_of_rain_or_snow}</span>
@@ -73,8 +73,8 @@ const Main = () => {
                     </div>
                 </article>
 
-                <article className="flex justify-between">
-                    <div className="flex items-center gap-2">
+                <article className="flex justify-between flex-col-reverse md:flex-row">
+                    <div className="flex items-center gap-2 mt-2 md:mt-0">
                         <img src={selectedDay?.icon} alt="" />
                         <p>
                             <span className="mr-2">
@@ -113,7 +113,7 @@ const Main = () => {
                 <WeatherForecastChart weatherList={zForecastList}  />
             </div>
 
-            <div className="w-full flex gap-2">
+            <div className="w-full flex gap-2 flex-col md:flex-row">
                 {
                     zForecastList.map((wf, i) => {
                         if(i >= 5) return null;
