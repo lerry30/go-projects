@@ -41,7 +41,11 @@ const FaveCities = () => {
                             <span className="text-white">
                                 {TitleFormat(city)}
                             </span>
-                            <X color="white" size={16} onClick={() => zRemoveCity(city)} />
+                            <X color="white" size={16} onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    zRemoveCity(city)
+                                }}
+                            />
                         </button>
                     )
                 })
