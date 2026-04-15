@@ -72,8 +72,6 @@ func (ow *OpenWeather) GetForecast(city string) (models.ForecastWeatherData, err
 
 	defer resp.Body.Close()
 
-	fmt.Println(url)
-
 	if resp.StatusCode != http.StatusOK {
 		return models.ForecastWeatherData{}, fmt.Errorf("failed to get weather forecast for %s.", city)
 	}
