@@ -9,11 +9,11 @@
 
 ## 1. Layout
 
-- **Split-screen layout** — two columns side by side inside a `max-w-5xl` centered container.
-- Outer wrapper: `rounded-3xl overflow-hidden shadow-2xl bg-white`, `min-height: 640px`.
-- Page background: light gray (`bg-gray-100`), centered with `min-h-screen flex items-center justify-center p-4`.
-- **Left panel** (`lg:w-1/2`): white background, `px-10 py-12`, flex column, vertically centered content. Contains the form or main page content.
-- **Right panel** (`hidden lg:flex lg:w-1/2`): gradient background, decorative blobs, SVG illustration, stat cards. Always visible only on `lg` and above; hidden on mobile.
+- **Split-screen layout** — two columns side by side inside a `max-w-5xl` centered container for sign in, sign up, forgot password page and other minimal content pages.
+- Outer wrapper: `rounded-3xl overflow-hidden shadow-2xl bg-white`, `min-height: calc(100vh-1rem) and min-width: calc(100vw-1rem) for pages with dense contents like dashboards or user profile page. Don't apply this outer wrapper for home page and other pages with text content`.
+- Page background for outer wrapper: light gray (`bg-gray-100`), centered with `min-h-screen flex items-center justify-center p-4 and padding of 1rem to give space for outer wrapper`.
+- **Left panel** (`lg:w-1/2`): white background, `px-10 py-12`, flex column, vertically centered content. Contains the form and other minimal content.
+- **Right panel** (`hidden lg:flex lg:w-1/2`): gradient background, decorative blobs, SVG illustration, stat cards. Always visible only on `lg` and above; hidden on mobile. This is also for minimal content that might contains form.
 
 ---
 
@@ -48,7 +48,7 @@
 
 ## 4. Gradient
 
-The brand gradient is used on the CTA button and the right panel background:
+The brand gradient is used on the CTA button and the background:
 
 ```
 /* Button */
@@ -124,7 +124,7 @@ background: linear-gradient(160deg, #4f1899 0%, #7C3AED 30%, #C026D3 62%, #f9731
 
 ---
 
-## 6. Right Panel Structure
+## 6. Right Panel Structure (Split Screen Layout)
 
 ```jsx
 <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden"
@@ -182,7 +182,7 @@ background: linear-gradient(160deg, #4f1899 0%, #7C3AED 30%, #C026D3 62%, #f9731
 
 ## 7. SVG Illustration Rules (Right Panel)
 
-Each page gets a unique contextual SVG illustration. All illustrations follow these rules:
+Minimal page gets a unique contextual SVG illustration. All illustrations follow these rules:
 
 - `viewBox="0 0 340 200"` (or `210` if taller), `fill="none"`, `className="w-full max-w-sm"`
 - All shapes use `rgba(255,255,255,...)` or `rgba(r,g,b,0.x)` fills — semi-transparent white or brand colors
@@ -198,9 +198,6 @@ Each page gets a unique contextual SVG illustration. All illustrations follow th
 | Login | UI dashboard card with floating check/add badges |
 | Signup | Team avatars row, progress bar, task checklist |
 | Forgot Password | Envelope icon, key shape, lock circle |
-| Onboarding | Step indicators, profile card, checkmarks |
-| Dashboard | Mini bar chart, notification badge, activity feed |
-| Settings | Gear/toggle shapes, profile avatar, sliders |
 | Pricing | Tier cards, checkmarks, crown badge |
 | 404 / Error | Broken path, warning triangle, refresh badge |
 
@@ -233,7 +230,7 @@ Each page gets a unique contextual SVG illustration. All illustrations follow th
 When building a new page, make sure it includes:
 
 - [ ] Luminary logo (top-left, gradient mark + wordmark)
-- [ ] Bold h1 heading with emoji or icon accent
+- [ ] Bold h1 heading
 - [ ] Muted subtitle / tagline below heading
 - [ ] Form fields with uppercase labels + underline inputs + purple focus state
 - [ ] Gradient CTA button with hover lift + active scale
@@ -246,4 +243,6 @@ When building a new page, make sure it includes:
 
 ## Quick Update
 
-Use lucide-react icons
+- Use lucide-react icons
+- Only applies split screen layout on pages with form and any page that needs user to focus at the center for action like a modal.
+- Add blobs for full width layout pages like dashboard, profile and product display with dense content. I need the blob to be semi-transparent with the touch of gradient style above.

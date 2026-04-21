@@ -2,14 +2,10 @@ package auth
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
-// secret key — load this from an env variable
-var SecretKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 
 // Claims is the data you store inside the token
 type Claims struct {

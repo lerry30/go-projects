@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-type contextKey string
-
-const ContextKeyUser contextKey = "user"
-
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get token from "Authorization: Bearer <token>" header
@@ -38,10 +34,4 @@ func Middleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), ContextKeyUser, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-// GetCurrentUser is a helper
-func GetCurrentUser(r *http.Request) (*Claims, bool) {
-	claims, ok := r.Context().Value(ContextKeyUser).(*Claims)
-	return claims, ok
 }

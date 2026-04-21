@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Eye, EyeClosed } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { sendJSON } from '@/utils/send';
-import { backendUrl } from '@/config/server';
+import { BASE_URL } from '@/config/server';
 import { SuccessModal, ErrorModal } from '@/components/Modal';
+
+import { GradientButton } from '@/components/Buttons';
+import { PrimaryField } from '@/components/Fields';
 
 import IllustrationSVG from '@/components/IllustrationSVG';
 import Loading from '@/components/Loading';
@@ -44,7 +47,7 @@ const Signup = () => {
 		try {
 			e.preventDefault();
 			if(!agreed) throw new Error('Read terms and condition first');
-			if(!form.password || form.password !== form.confirm) 
+			if(form.password !== form.confirm) 
 				throw new Error('Re-enter your password to confirm');
 			
 			const tForm = {
@@ -55,11 +58,15 @@ const Signup = () => {
 				password: form.password 
 			};
 
-			if(!tForm.first_name || !tForm.last_name || !tForm.email || !tForm.phone) 
-				throw new Error('Fields are empty');
+			for(const [field, value] of Object.entries(tForm)) {
+				if(!value) {
+					const fieldName = `${field[0].toUpperCase()}${field.slice(1).toLowerCase()}`.replaceAll('_', ' ');
+					throw new Error(`${fieldName} is empty`);
+				}
+			}
 			
 			setLoading(true);
-			const result = await sendJSON(`${backendUrl}/signup`, tForm);
+			const result = await sendJSON(`${BASE_URL}/signup`, tForm);
 			if(result) {
 				setModal({message: 'Account created successfully.', type: 'success'})
 				setTimeout(() => {
@@ -68,8 +75,9 @@ const Signup = () => {
 				}, 1000);
 			}
 		} catch(err) {
-			console.log('Signup handling form submition error: ', err);
-			setModal({message: 'Something went wrong', type: 'error'});
+			const errorMessage = err?.message || 'Something went wrong';
+			console.log('Signup handling form submition error: ', errorMessage);
+			setModal({message: errorMessage, type: 'error'});
 			setTimeout(() => {
 				setModal({message: '', type: null});
 			}, 1000);
@@ -119,20 +127,15 @@ const Signup = () => {
 
 						{/* Name + Email */}
 						{fields.map(({ id, label, type, placeholder }) => (
-							<div key={id}>
-								<label className="block text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">
-									{label}
-								</label>
-								<input
-									type={type}
-									value={form[id]}
-									onChange={update(id)}
-									placeholder={placeholder}
-									required
-									className="w-full border-0 border-b border-gray-200 pb-2 pt-1 text-sm text-gray-900 bg-transparent outline-none placeholder-gray-300 focus:border-purple-600 transition-colors duration-200"
-									style={{ fontFamily: "'Poppins', sans-serif" }}
-								/>
-							</div>
+							<PrimaryField
+								key={id}
+								label={label}
+								type={type}
+								value={form[id]}
+								onChange={update(id)}
+								placeholder={placeholder}
+								required
+							/>
 						))}
 
 						{/* Password */}
@@ -141,14 +144,12 @@ const Signup = () => {
 								Password
 							</label>
 							<div className="relative">
-								<input
+								<PrimaryField
 									type={showPassword ? "text" : "password"}
 									value={form.password}
 									onChange={update("password")}
 									placeholder="Min. 8 characters"
 									required
-									className="w-full border-0 border-b border-gray-200 pb-2 pt-1 text-sm text-gray-900 bg-transparent outline-none placeholder-gray-300 focus:border-purple-600 transition-colors duration-200 pr-8"
-									style={{ fontFamily: "'Poppins', sans-serif" }}
 								/>
 								<button
 									type="button"
@@ -180,14 +181,12 @@ const Signup = () => {
 								Confirm Password
 							</label>
 							<div className="relative">
-								<input
+								<PrimaryField
 									type={showConfirm ? "text" : "password"}
 									value={form.confirm}
 									onChange={update("confirm")}
 									placeholder="Re-enter your password"
 									required
-									className="w-full border-0 border-b border-gray-200 pb-2 pt-1 text-sm text-gray-900 bg-transparent outline-none placeholder-gray-300 focus:border-purple-600 transition-colors duration-200 pr-8"
-									style={{ fontFamily: "'Poppins', sans-serif" }}
 								/>
 								<button
 									type="button"
@@ -215,25 +214,24 @@ const Signup = () => {
 							/>
 							<span className="text-xs text-gray-400 leading-relaxed">
 								I agree to the{" "}
-								<a href="#" className="text-purple-600 font-semibold hover:underline">Terms of Service</a>
+								<Link to="/termsofservice" className="text-purple-600 font-semibold hover:underline">
+									Terms of Service
+								</Link>
 								{" "}and{" "}
-								<a href="#" className="text-purple-600 font-semibold hover:underline">Privacy Policy</a>
+								<Link to="/privpolicy" className="text-purple-600 font-semibold hover:underline">
+									Privacy Policy
+								</Link>
 							</span>
 						</label>
 
 						{/* CTA */}
-						<button
+						<GradientButton
 							type="submit"
 							disabled={loading || !agreed}
-							className="w-full py-3.5 rounded-2xl text-white text-sm font-semibold tracking-wide transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 cursor-pointer"
-							style={{
-								background: "linear-gradient(135deg, #7C3AED 0%, #C026D3 60%, #f97316 120%)",
-								boxShadow: "0 8px 24px rgba(124,58,237,0.28)",
-								fontFamily: "'Poppins', sans-serif",
-							}}
+							className="w-full"
 						>
 							{loading ? "Creating your account..." : "Get started for free →"}
-						</button>
+						</GradientButton>
 					</form>
 
 					{/* Sign in link */}

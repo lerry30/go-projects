@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SuccessModal, ErrorModal } from '@/components/Modal';
 import { sendJSON } from '@/utils/send';
-import { backendUrl } from '@/config/server';
+import { BASE_URL } from '@/config/server';
+
+import { GradientButton } from '@/components/Buttons';
+import { PrimaryField } from '@/components/Fields';
 
 import IllustrationSVG from '@/components/IllustrationSVG';
 import Loading from '@/components/Loading'
@@ -36,7 +39,7 @@ const Signin = () => {
 				throw new Error('Fields are required');
 			
 			setLoading(true);
-			const result = await sendJSON(`${backendUrl}/signin`, tForm);
+			const result = await sendJSON(`${BASE_URL}/signin`, tForm);
 			if(result) {
 				setModal({message: 'Login successfully.', type: 'success'})
 				setTimeout(() => {
@@ -45,8 +48,9 @@ const Signin = () => {
 				}, 1000);
 			}
 		} catch(err) {
-			console.log("Failed to signin -", err);
-			setModal({message: 'Something went wrong', type: 'error'});
+			const errorMessage = err?.message || 'Something went wrong';
+			console.log("Failed to signin: ", errorMessage);
+			setModal({message: errorMessage, type: 'error'});
 			setTimeout(() => {
 				setModal({message: '', type: null});
 			}, 1000);
@@ -89,36 +93,24 @@ const Signin = () => {
 					{/* Form */}
 					<form onSubmit={handleSubmit} className="space-y-6">
 						{/* Email */}
-						<div>
-							<label className="block text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">
-								Email Address
-							</label>
-							<input
-								type="email"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								placeholder="you@email.com"
-								required
-								className="w-full border-0 border-b border-gray-200 pb-2 pt-1 text-sm text-gray-900 bg-transparent outline-none placeholder-gray-300 focus:border-purple-600 transition-colors duration-200"
-								style={{ fontFamily: "'Poppins', sans-serif" }}
-							/>
-						</div>
+						<PrimaryField 
+							label="Email Address"
+							type="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							placeholder="you@email.com"
+							required
+						/>
 
 						{/* Password */}
-						<div>
-							<label className="block text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">
-								Password
-							</label>
-							<input
-								type="password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								placeholder="••••••••••"
-								required
-								className="w-full border-0 border-b border-gray-200 pb-2 pt-1 text-sm text-gray-900 bg-transparent outline-none placeholder-gray-300 focus:border-purple-600 transition-colors duration-200"
-								style={{ fontFamily: "'Poppins', sans-serif" }}
-							/>
-						</div>
+						<PrimaryField
+							label="Password"
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="••••••••••"
+							required
+						/>
 
 						{/* Remember + Forgot */}
 						<div className="flex items-center justify-between">
@@ -137,18 +129,13 @@ const Signin = () => {
 						</div>
 
 						{/* CTA Button */}
-						<button
+						<GradientButton
 							type="submit"
 							disabled={loading}
-							className="w-full py-3.5 rounded-2xl text-white text-sm font-semibold tracking-wide transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 active:scale-95 disabled:opacity-70 cursor-pointer"
-							style={{
-								background: "linear-gradient(135deg, #7C3AED 0%, #C026D3 60%, #f97316 120%)",
-								boxShadow: "0 8px 24px rgba(124,58,237,0.3)",
-								fontFamily: "'Poppins', sans-serif",
-							}}
+							className="w-full"
 						>
 							{loading ? "Signing in..." : "Sign in to dashboard →"}
-						</button>
+						</GradientButton>
 					</form>
 
 					{/* Sign up link */}
