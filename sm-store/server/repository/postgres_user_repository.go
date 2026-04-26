@@ -19,23 +19,23 @@ func NewPostgresUserRepository(db *pgxpool.Pool, rdb *redis.Client) *PostgresUse
 	return &PostgresUserRepository{db: db, rdb: rdb}
 }
 
-func (r *PostgresUserRepository) GetByID(id string) (*UserRow, error) {
-	cacheKey := "user" + id
+func (r *PostgresUserRepository) GetByID(id int32) (*userRow, error) {
+	cacheKey := fmt.Sprintf("user%d", id)
 
 	// redis get
-	cacheUsr, err := cache.Get[UserRow](r.rdb, cacheKey)
+	cacheUsr, err := cache.Get[userRow](r.rdb, cacheKey)
 	if err == nil {
 		return &cacheUsr, nil // cache hit
 	}
 
 	// database get
-	userRes, err := QueryRow[string, UserRow](r.db, "site_user", "id", id)
+	userRes, err := QueryRow[int32, userRow](r.db, "site_user", "id", id)
 	if err != nil {
 		return nil, fmt.Errorf("DB Query user error:\n %w", err)
 	}
 
 	// redis save
-	go func(u UserRow) {
+	go func(u userRow) {
 		u.Password = ""
 		if err := cache.Set(r.rdb, cacheKey, u, 20*time.Minute); err != nil {
 			fmt.Printf("failed to cache user data: %s", err)
@@ -46,7 +46,7 @@ func (r *PostgresUserRepository) GetByID(id string) (*UserRow, error) {
 }
 
 func (r *PostgresUserRepository) Create(user map[string]any) (int32, error) {
-	userRes, err := Create[UserRow](r.db, "site_user", user)
+	userRes, err := Create[userRow](r.db, "site_user", user)
 	if err != nil {
 		return 0, fmt.Errorf("Create Error: \n %w", err)
 	}
@@ -54,8 +54,8 @@ func (r *PostgresUserRepository) Create(user map[string]any) (int32, error) {
 	return userRes.ID, nil
 }
 
-func (r *PostgresUserRepository) GetByEmail(email string) (*UserRow, error) {
-	userRes, err := QueryRow[string, UserRow](r.db, "site_user", "email_address", email)
+func (r *PostgresUserRepository) GetByEmail(email string) (*userRow, error) {
+	userRes, err := QueryRow[string, userRow](r.db, "site_user", "email_address", email)
 	if err != nil {
 		return nil, fmt.Errorf("DB Query user email error:\n %w", err)
 	}
@@ -63,8 +63,8 @@ func (r *PostgresUserRepository) GetByEmail(email string) (*UserRow, error) {
 	return &userRes, nil
 }
 
-func (r *PostgresUserRepository) Update(user map[string]any, id int32) (*UserRow, error) {
-	userRes, err := Update[int32, UserRow](r.db, "site_user", user, "id", id)
+func (r *PostgresUserRepository) Update(user map[string]any, id int32) (*userRow, error) {
+	userRes, err := Update[int32, userRow](r.db, "site_user", user, "id", id)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to update user: \n %w", err)
 	}

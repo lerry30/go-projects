@@ -9,14 +9,20 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type Primitive interface {
 	int | int32 | string | bool
 }
 
-func QueryRow[T Primitive, R any](dbPool *pgxpool.Pool, table string, column string, value T) (R, error) {
+type DBTX interface {
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+func QueryRow[T Primitive, R any](dbPool DBTX, table string, column string, value T) (R, error) {
 	var zero R
 
 	if err := ValidateIdentifier(table); err != nil {
@@ -44,7 +50,7 @@ func QueryRow[T Primitive, R any](dbPool *pgxpool.Pool, table string, column str
 	return pgx.CollectOneRow(rows, pgx.RowToStructByName[R]) // R, error
 }
 
-func Create[R any](dbPool *pgxpool.Pool, table string, args pgx.NamedArgs) (R, error) {
+func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
 	var zero R
 	columns := slices.Collect(maps.Keys(args))
 
@@ -81,7 +87,7 @@ func Create[R any](dbPool *pgxpool.Pool, table string, args pgx.NamedArgs) (R, e
 	return pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
 }
 
-func Update[T Primitive, R any](dbPool *pgxpool.Pool, table string, args pgx.NamedArgs, column string, value T) (R, error) {
+func Update[T Primitive, R any](dbPool DBTX, table string, args pgx.NamedArgs, column string, value T) (R, error) {
 	var zero R
 	columns := slices.Collect(maps.Keys(args))
 

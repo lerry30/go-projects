@@ -33,8 +33,10 @@ func main() {
 
 	// pattern: Interface-Based Dependency Injection
 	userRepo := repository.NewPostgresUserRepository(db.pool, rdb)
+	addrRepo := repository.NewPostgresAddressRepository(db.pool, rdb)
 
 	userHandler := api.NewUserHandler(userRepo)
+	addrHandler := api.NewAddressHandler(addrRepo)
 
 	// API server
 	var port string = ":" + os.Getenv("PORT")
@@ -48,13 +50,18 @@ func main() {
 
 	router.HandleFunc("/signup", makeHTTPHandleFunc(userHandler.SignUpHandler)).Methods("POST")
 	router.HandleFunc("/signin", makeHTTPHandleFunc(userHandler.SignInHandler)).Methods("POST")
-	router.HandleFunc("/logout", makeHTTPHandleFunc(userHandler.LogoutHandler)).Methods("POST")
 
 	private := router.PathPrefix("/priv").Subrouter()
 	private.Use(auth.Middleware)
 
 	private.HandleFunc("/user", makeHTTPHandleFunc(userHandler.ProfileHandler)).Methods("GET")
 	private.HandleFunc("/me", makeHTTPHandleFunc(userHandler.UpdateUserHandler)).Methods("PATCH")
+	private.HandleFunc("/logout", makeHTTPHandleFunc(userHandler.LogoutHandler)).Methods("POST")
+
+	private.HandleFunc("/addresses", makeHTTPHandleFunc(addrHandler.CreateHandler)).Methods("POST")
+	private.HandleFunc("/addresses", makeHTTPHandleFunc(addrHandler.GetAddressesHandler)).Methods("GET")
+	private.HandleFunc("/addresses/{id:[0-9]+}", makeHTTPHandleFunc(addrHandler.DeleteHandler)).Methods("DELETE")
+	private.HandleFunc("/addresses/{id:[0-9]+}/set-default", makeHTTPHandleFunc(addrHandler.SetDefaultHandler)).Methods("POST")
 
 	srv := &http.Server{
 		Addr:    port,

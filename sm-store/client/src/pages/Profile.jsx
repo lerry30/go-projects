@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
 	User, MapPin, CreditCard, ShoppingBag, Settings,
 	Edit3, Plus, Trash2, Check, ChevronRight, Package,
 	Star, LogOut, Camera, Shield, Bell, Lock, ChevronDown
 } from "lucide-react";
 
-import { GradientButton } from '@/components/Buttons';
+import { GradientButton, PlainButton } from '@/components/Buttons';
 import { PrimaryField } from '@/components/Fields'
-import { ErrorModal } from '@/components/Modal';
+import { ErrorModal, Prompt } from '@/components/Modal';
 
 import { poppins, gradient } from '@/config/style';
 
@@ -18,6 +18,7 @@ import { BASE_URL } from '@/config/server';
 import { useNavigate } from 'react-router-dom';
 
 import Loading from '@/components/Loading'
+import Pagination from '@/components/Pagination';
 
 const panelGradient = "linear-gradient(160deg, #4f1899 0%, #7C3AED 30%, #C026D3 62%, #f97316 100%)";
 
@@ -161,21 +162,20 @@ function RightPanel({ activeTab }) {
 // TAB PANELS
 // ══════════════════════════════════════════════════════════════════════════════
 
-function ProfileTab({ toast }) {
+function ProfileTab({ toast, loading }) {
 	const [fullName, setFullName] = useState('');
 	const [memberSince, setMemberSince] = useState('');
 
 	const [form, setForm] = useState({ first_name: '', last_name: '', email: '', phone: '' });
 	const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
-	const [loading, setLoading] = useState(false);
 	const [modal, setModal] = useState({message: '', type: null});
 
 	const navigate = useNavigate();
 
 	const getUserDetails = async () => {
 		try {
-			setLoading(true);
+			loading(true);
 
 			const result = await apiRequest(`${BASE_URL}/priv/user`, {auth: true});
 			if(result) {
@@ -192,12 +192,12 @@ function ProfileTab({ toast }) {
 			navigate('/signin');
 		}
 
-		setLoading(false);
+		loading(false);
 	}
 
 	const updateUserDetails = async () => {
 		try {
-			setLoading(true);
+			loading(true);
 
 			const formData = {
 				first_name: String(form.first_name).trim(),
@@ -241,7 +241,7 @@ function ProfileTab({ toast }) {
 				setModal({message: '', type: null});
 			}, 1000);
 		} finally {
-			setLoading(false);
+			loading(false);
 		}
 	}
 
@@ -282,8 +282,6 @@ function ProfileTab({ toast }) {
 				Save Changes →
 			</GradientButton>
 
-			{loading && <Loading />}
-
 			{(modal?.message && modal?.type === 'error') && (
 				<ErrorModal
 					header="Oops!"
@@ -297,81 +295,264 @@ function ProfileTab({ toast }) {
 	);
 }
 
-function AddressTab({ toast }) {
-	const [addresses, setAddresses] = useState([
-		{ id: 1, label: "Home", line1: "123 Maple St", city: "San Francisco", state: "CA", zip: "94110", default: true },
-		{ id: 2, label: "Work", line1: "456 Market Ave", city: "San Francisco", state: "CA", zip: "94105", default: false },
-	]);
+function AddressTab({ toast, loading }) {
+	{/*{ id: 1, line1: "123 Maple St", line2: "", city: "San Francisco", state: "CA", zip: "94110", is_default: true },*/}
+	const [addresses, setAddresses] = useState([]);
 	const [adding, setAdding] = useState(false);
-	const [form, setForm] = useState({ label: "", line1: "", city: "", state: "", zip: "" });
+	const [form, setForm] = useState({ line1: "", line2: "", city: "", state: "", zip: "" });
 	const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
-	const addAddress = () => {
-		if (!form.line1) return;
-		setAddresses(a => [...a, { ...form, id: Date.now(), default: false }]);
-		setForm({ label: "", line1: "", city: "", state: "", zip: "" });
-		setAdding(false);
-		toast("Address saved!");
+	const [modal, setModal] = useState({message: '', type: null});
+	const [prompt, setPrompt] = useState({header: '', message: '', callback: null, active: false});
+
+	const [totalCount, setTotalCount] = useState(8);
+
+	const page = useRef(1);
+
+	const addAddress = async () => {
+		try {
+			loading(true);
+
+			const addrForm = {
+				line1: String(form.line1).trim(),
+				line2: String(form.line2).trim(),
+				city: String(form.city).trim(),
+				state: String(form.state).trim(),
+				zip: String(form.zip).trim(),
+				country: 'Philippines'
+			}
+
+			for(const [field, value] of Object.entries(addrForm)) {
+				if(!value && field != 'line2') {
+					const fieldName = `${field[0].toUpperCase()}${field.slice(1).toLowerCase()}`.replaceAll('_', ' ');
+					throw new Error(`${fieldName} is empty`);
+				}
+			}
+
+			const result = await apiRequest(
+				`${BASE_URL}/priv/addresses`,
+				{
+					method: 'POST',
+					body: JSON.stringify(addrForm),
+					auth: true,
+				},
+			);
+			if(result && result?.id && result?.line1 && result?.city && result?.state && result?.zip) {
+				setAddresses(a => {
+					a.pop();
+					return [result, ...a];
+				});
+
+				setForm({ line1: "", line2: "", city: "", state: "", zip: "" });
+				toast("Address saved!");
+				setAdding(false);
+			}
+		} catch(err) {
+			const errorMessage = err?.message || 'Something went wrong';
+			console.log("Failed to add address: ", errorMessage);
+			setModal({message: errorMessage, type: 'error'});
+			setTimeout(() => {
+				setModal({message: '', type: null});
+			}, 1000);
+		} finally {
+			loading(false);
+		}
 	};
 
-	const remove = id => setAddresses(a => a.filter(x => x.id !== id));
-	const setDefault = id => setAddresses(a => a.map(x => ({ ...x, default: x.id === id })));
+	const getUserAddresses = async (offset) => {
+		try {
+			loading(true);
+
+			const result = await apiRequest(
+				`${BASE_URL}/priv/addresses?limit=4&offset=${offset}`, 
+				{auth: true}
+			);
+			if(result && Array.isArray(result?.addresses)) {
+				setAddresses(result.addresses);
+				setTotalCount(Number(result.total_count) || 0)
+			}
+		} catch(err) {
+		} finally {
+			loading(false);
+		}
+	}
+
+	const remove = async (id) => {
+		try {
+			loading(true);
+			const result = await apiRequest(
+				`${BASE_URL}/priv/addresses/${id}`,
+				{
+					method: 'DELETE',
+					auth: true,
+				}
+			);
+
+			if(result) {
+				//setAddresses(a => a.filter(x => x.id !== id));
+				getUserAddresses(page.current);
+				toast("Address removed!");
+			}
+		} catch(err) {
+			const errorMessage = `${err?.message.replace(/\.$/, '') || 'Something went wrong'}. Please try again later.`;
+			console.log("Failed to remove address: ", errorMessage);
+			setModal({message: errorMessage, type: 'error'});
+			setTimeout(() => {
+				setModal({message: '', type: null});
+			}, 1000);
+		} finally {
+			loading(false);
+			setPrompt({header: '', message: '', callback: null, active: false});
+		}
+	}
+
+	const removeConfirmation = (id) => {
+		setPrompt({
+			header: 'Remove Address',
+			message: 'Are you sure you want to remove this address?',
+			callback: () => remove(id),
+			active: true,
+		});
+	}
+
+
+	const setDefault = async (id) => {
+		try {
+			loading(true);
+
+			const result = await apiRequest(
+				`${BASE_URL}/priv/addresses/${id}/set-default`,
+				{
+					method: 'POST',
+					auth: true,
+				}
+			);
+
+			if(result) {
+				setAddresses(a => a.map(x => ({ ...x, is_default: x.id === id })));
+				toast("Successfully set as the default address");
+			}
+		} catch(err) {
+			const errorMessage = `${err?.message.replace(/\.$/, '') || 'Something went wrong'}. Please try again later.`;
+			console.log("Failed to set address as default: ", errorMessage);
+			setModal({message: errorMessage, type: 'error'});
+			setTimeout(() => {
+				setModal({message: '', type: null});
+			}, 1000);
+		} finally {
+			loading(false);
+		}
+	}
 
 	return (
-		<div className="space-y-4">
-			{addresses.map(a => (
-				<div key={a.id} className={`rounded-2xl border p-4 ${a.default ? "border-purple-200 bg-purple-50/40" : "border-gray-100 bg-gray-50/40"}`}>
-					<div className="flex items-start justify-between">
-						<div>
-							<div className="flex items-center gap-2 mb-1">
-								<span className="text-xs font-semibold uppercase tracking-widest text-gray-400" style={{ fontFamily: poppins }}>{a.label || "Address"}</span>
-								{a.default && <span className="text-[10px] px-2 py-0.5 rounded-full text-purple-600 bg-purple-100 font-semibold" style={{ fontFamily: poppins }}>Default</span>}
+		<div className="relative h-full">
+			<div className="h-[50vh] overflow-auto space-y-4">
+				{addresses.map(a => (
+					<div key={a.id} className={`rounded-2xl border p-4 ${a.is_default ? "border-purple-200 bg-purple-50/40" : "border-gray-100 bg-gray-50/40"}`}>
+						<div className="flex items-start justify-between">
+							<div>
+								<div className="flex items-center gap-2 mb-1">
+									<span className="text-sm text-gray-800" style={{ fontFamily: poppins }}>
+										{a.line1}
+									</span>
+									{a.is_default && (
+										<span className="text-[10px] px-2 py-0.5 rounded-full text-purple-600 bg-purple-100 font-semibold" style={{ fontFamily: poppins }}>
+											Default
+										</span>
+									)}
+								</div>
+								{ a.line2 && (
+									<p className="text-xs text-gray-400" style={{ fontFamily: poppins }}>
+										{a.line2}
+									</p>
+								)}
+								<p className="text-xs font-semibold tracking-widest text-gray-400" style={{ fontFamily: poppins }}>
+									{a.city}, {a.state} {a.zip}
+								</p>
 							</div>
-							<p className="text-sm text-gray-800" style={{ fontFamily: poppins }}>{a.line1}</p>
-							<p className="text-xs text-gray-400" style={{ fontFamily: poppins }}>{a.city}, {a.state} {a.zip}</p>
-						</div>
-						<div className="flex gap-2">
-							{!a.default && (
-								<button onClick={() => setDefault(a.id)} className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors" style={{ fontFamily: poppins }}>
-									Set default
+							<div className="flex gap-2">
+								{!a.is_default && (
+									<button onClick={() => setDefault(a.id)} className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors" style={{ fontFamily: poppins }}>
+										Set default
+									</button>
+								)}
+								<button onClick={() => removeConfirmation(a.id)} className="text-gray-300 hover:text-red-400 transition-colors">
+									<Trash2 size={14} />
 								</button>
-							)}
-							<button onClick={() => remove(a.id)} className="text-gray-300 hover:text-red-400 transition-colors">
-								<Trash2 size={14} />
-							</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			))}
+				))}
 
-			{adding ? (
-				<div className="rounded-2xl border border-gray-100 p-5 space-y-4 bg-gray-50/40">
-					<div className="grid grid-cols-2 gap-4">
-						<PrimaryField label="Label" value={form.label} onChange={set("label")} placeholder="Home / Work…" />
-						<PrimaryField label="Street" value={form.line1} onChange={set("line1")} placeholder="123 Main St" />
+				{adding ? (
+					<div className="rounded-2xl border border-gray-100 p-5 space-y-4 bg-gray-50/40">
+						<div className="grid grid-cols-2 gap-4">
+							<PrimaryField label="Address line 1" value={form.line1} onChange={set("line1")} placeholder="House No. / Street / Building" />
+							<PrimaryField label="Address line 2" value={form.line2} onChange={set("line2")} placeholder="Apartment / Unit / Floor (optional)" />
+						</div>
+						<div className="grid grid-cols-3 gap-4">
+							<PrimaryField label="City" value={form.city} onChange={set("city")} placeholder="City" />
+							<PrimaryField label="State / Region" value={form.state} onChange={set("state")} placeholder="CA" />
+							<PrimaryField label="ZIP" value={form.zip} onChange={set("zip")} placeholder="94110" />
+						</div>
+						<div className="flex gap-3">
+							<GradientButton className="w-1/2" onClick={addAddress}>
+								Save Address →
+							</GradientButton>
+							<PlainButton onClick={() => setAdding(false)} className="w-1/2">
+								Cancel
+							</PlainButton>
+						</div>
 					</div>
-					<div className="grid grid-cols-3 gap-4">
-						<PrimaryField label="City" value={form.city} onChange={set("city")} placeholder="City" />
-						<PrimaryField label="State" value={form.state} onChange={set("state")} placeholder="CA" />
-						<PrimaryField label="ZIP" value={form.zip} onChange={set("zip")} placeholder="94110" />
-					</div>
-					<div className="flex gap-3">
-						<GradientButton className="flex-1" onClick={addAddress}>Save Address →</GradientButton>
-						<button onClick={() => setAdding(false)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors" style={{ fontFamily: poppins }}>Cancel</button>
-					</div>
-				</div>
-			) : (
-				<button onClick={() => setAdding(true)}
-					className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-purple-300 hover:text-purple-500 transition-all flex items-center justify-center gap-2"
-					style={{ fontFamily: poppins }}>
-					<Plus size={14} /> Add New Address
-				</button>
+				) : (
+					<button onClick={() => setAdding(true)}
+						className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-purple-300 hover:text-purple-500 transition-all flex items-center justify-center gap-2"
+						style={{ fontFamily: poppins }}>
+						<Plus size={14} /> Add New Address
+					</button>
+				)}
+			</div>
+
+			<div className="absolute bottom-0 w-full p-4 flex justify-end items-center border border-gray-300/50 rounded-2xl">
+				<Pagination 
+					total={totalCount} 
+					callback={(pageNo) => {
+						getUserAddresses(pageNo);
+						page.current = pageNo;
+					}}
+				/>
+			</div>
+
+			{(modal?.message && modal?.type === 'error') && (
+				<ErrorModal
+					header="Oops!"
+					message={modal.message}
+					callback={() => {
+						setModal({message: '', type: null});
+					}}
+				/>
+			)}
+
+			{prompt?.active && (
+				<Prompt
+					header={prompt.header}
+					message={prompt.message}
+					callback={prompt.callback}
+					onClose={() => {
+						setPrompt({
+							header: '', 
+							message: '',
+							callback: null,
+							active: false,
+						});
+					}}
+				/>
 			)}
 		</div>
 	);
 }
 
-function PaymentTab({ toast }) {
+function PaymentTab({ toast, loading }) {
 	const [cards, setCards] = useState([
 		{ id: 1, brand: "Visa", last4: "4242", expiry: "12/26", default: true },
 		{ id: 2, brand: "Mastercard", last4: "8888", expiry: "09/25", default: false },
@@ -436,7 +617,7 @@ function PaymentTab({ toast }) {
 	);
 }
 
-function OrdersTab() {
+function OrdersTab({ loading }) {
 	const [expanded, setExpanded] = useState(null);
 
 	return (
@@ -494,9 +675,13 @@ function OrdersTab() {
 	);
 }
 
-function SettingsTab({ toast }) {
+function SettingsTab({ toast, loading }) {
 	const [notifications, setNotifications] = useState({ orders: true, promos: false, security: true });
 	const [privacy, setPrivacy] = useState("friends");
+
+	const [modal, setModal] = useState({message: '', type: null});
+
+	const navigate = useNavigate();
 
 	const Toggle = ({ checked, onChange }) => (
 		<button onClick={() => onChange(!checked)}
@@ -517,6 +702,35 @@ function SettingsTab({ toast }) {
 			{children}
 		</div>
 	);
+
+	const signOut = async () => {
+		try {
+			loading(true);
+			const result = await apiRequest(
+				`${BASE_URL}/priv/logout`,
+				{
+					method: 'POST',
+					auth: true,
+				}
+			);
+			if(result) {
+				localStorage.removeItem('token');
+				toast("Signed out!")
+				setTimeout(() => {
+					navigate('/signin');
+				}, 1000);
+			}
+		} catch(err) {
+			const errorMessage = `${err?.message.replace(/\.$/, '') || 'Something went wrong'}. Please try again later.`;
+			console.log("Failed sign out user: ", errorMessage);
+			setModal({message: errorMessage, type: 'error'});
+			setTimeout(() => {
+				setModal({message: '', type: null});
+			}, 1000);
+		} finally {
+			loading(false);
+		}
+	}
 
 	return (
 		<div className="space-y-6">
@@ -558,12 +772,22 @@ function SettingsTab({ toast }) {
 				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: poppins }}>Account</p>
 				<div className="rounded-2xl border border-gray-100 px-4">
 					<Row icon={LogOut} label="Sign out">
-						<button onClick={() => toast("Signed out!")} className="text-xs text-red-400 font-semibold hover:text-red-500 transition-colors flex items-center gap-1" style={{ fontFamily: poppins }}>
+						<button onClick={signOut} className="text-xs text-red-400 font-semibold hover:text-red-500 transition-colors flex items-center gap-1" style={{ fontFamily: poppins }}>
 							Sign out <ChevronRight size={12} />
 						</button>
 					</Row>
 				</div>
 			</div>
+
+			{(modal?.message && modal?.type === 'error') && (
+				<ErrorModal
+					header="Oops!"
+					message={modal.message}
+					callback={() => {
+						setModal({message: '', type: null});
+					}}
+				/>
+			)}
 		</div>
 	);
 }
@@ -575,6 +799,7 @@ function SettingsTab({ toast }) {
 const Profile = () => {
 	const [active, setActive] = useState("profile");
 	const [toastMsg, setToastMsg] = useState("");
+	const [loading, setLoading] = useState(false);
 
 	const toast = msg => {
 		setToastMsg(msg);
@@ -583,11 +808,11 @@ const Profile = () => {
 
 	const renderTab = () => {
 		switch (active) {
-			case "profile": return <ProfileTab toast={toast} />;
-			case "address": return <AddressTab toast={toast} />;
-			case "payment": return <PaymentTab toast={toast} />;
-			case "orders": return <OrdersTab />;
-			case "settings": return <SettingsTab toast={toast} />;
+			case "profile": return <ProfileTab toast={toast} loading={setLoading} />;
+			case "address": return <AddressTab toast={toast} loading={setLoading} />;
+			case "payment": return <PaymentTab toast={toast} loading={setLoading} />;
+			case "orders": return <OrdersTab loading={setLoading} />;
+			case "settings": return <SettingsTab toast={toast} loading={setLoading} />;
 		}
 	};
 
@@ -633,6 +858,8 @@ const Profile = () => {
 				{/* RIGHT PANEL */}
 				{/*<RightPanel activeTab={active} />*/}
 			</div>
+
+			{loading && <Loading />}
 
 			<Toast msg={toastMsg} />
 		</div>

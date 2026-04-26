@@ -16,6 +16,16 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type UserHandler struct {
+	repo repository.UserRepository
+}
+
+func NewUserHandler(repo repository.UserRepository) *UserHandler {
+	return &UserHandler{repo: repo}
+}
+
+// ---------------------------------------
+
 type Credentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -28,15 +38,7 @@ type UserInfo struct {
 	Phone     string `json:"phone"`
 }
 
-// ---------------------------------------
-
-type UserHandler struct {
-	repo repository.UserRepository
-}
-
-func NewUserHandler(repo repository.UserRepository) *UserHandler {
-	return &UserHandler{repo: repo}
-}
+// --------------------------------------
 
 func (h *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) error {
 	defer r.Body.Close()
@@ -44,7 +46,8 @@ func (h *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) erro
 	var userInfo UserInfo
 	err := json.NewDecoder(r.Body).Decode(&userInfo)
 	if err != nil {
-		return fmt.Errorf("Invalid json.")
+		fmt.Println("Invalid json")
+		return fmt.Errorf("Something went wrong")
 	}
 
 	userInfo.FirstName = capitalize(strings.TrimSpace(userInfo.FirstName))
@@ -76,7 +79,8 @@ func (h *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) erro
 
 	hash, err := repository.HashPassword(userInfo.Password)
 	if err != nil {
-		return fmt.Errorf("securing user password: %w", err)
+		fmt.Printf("%s\n Hash password error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Invalid credentials")
 	}
 
 	id, err := h.repo.Create(
@@ -90,16 +94,15 @@ func (h *UserHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) erro
 	)
 
 	if err != nil {
-		fmt.Println(strings.Repeat("-", 10))
-		fmt.Printf("Database error: %s", err)
-
-		return fmt.Errorf("failed to create user account")
+		fmt.Printf("%s\n Database error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Failed to create user account")
 	}
 
 	strId := fmt.Sprintf("%d", id)
 	token, err := auth.GenerateToken(strId, userInfo.Email)
 	if err != nil {
-		return fmt.Errorf("could not generate token")
+		fmt.Printf("%s\n Generate token error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Something went wrong")
 	}
 
 	w.Header().Set("Authorization", "Bearer "+token)
@@ -113,24 +116,24 @@ func (h *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) erro
 
 	var userCred Credentials
 	if err := json.NewDecoder(r.Body).Decode(&userCred); err != nil {
-		return fmt.Errorf("Invalid json.")
+		fmt.Println("Invalid json")
+		return fmt.Errorf("Something went wrong")
 	}
 
 	if !isValidEmail(userCred.Email) {
-		return fmt.Errorf("%q is not a valid email address", userCred.Email)
+		fmt.Printf("%s\n %q invalid email address", strings.Repeat("-", 20), userCred.Email)
+		return fmt.Errorf("Invalid credentials")
 	}
 
 	user, err := h.repo.GetByEmail(userCred.Email)
 	if err != nil {
-		fmt.Println(strings.Repeat("-", 10))
-		fmt.Printf("db query error: %s\n", err)
-
-		return fmt.Errorf("User doesn't exists.")
+		fmt.Printf("%s\n db query error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Invalid credentials")
 	}
 
 	hash := user.Password
 	if hash == "" {
-		return fmt.Errorf("User doesn't exists")
+		return fmt.Errorf("Invalid credentials")
 	}
 
 	var match bool = repository.CheckPasswordHash(userCred.Password, hash)
@@ -144,7 +147,8 @@ func (h *UserHandler) SignInHandler(w http.ResponseWriter, r *http.Request) erro
 
 	token, err := auth.GenerateToken(userId, userCred.Email)
 	if err != nil {
-		return fmt.Errorf("could not generate token")
+		fmt.Printf("%s\n Generate token error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Something went wrong")
 	}
 
 	w.Header().Set("Authorization", "Bearer "+token)
@@ -163,17 +167,16 @@ func (h *UserHandler) LogoutHandler(w http.ResponseWriter, r *http.Request) erro
 }
 
 func (h *UserHandler) ProfileHandler(w http.ResponseWriter, r *http.Request) error {
-	user, ok := auth.GetCurrentUser(r)
-	if !ok || user.UserID == "" {
-		return fmt.Errorf("unknown user")
+	userID, err := auth.GetCurrentUserID(r)
+	if err != nil {
+		fmt.Printf("%s\n Get user ID: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Invalid credentials")
 	}
 
-	userRow, err := h.repo.GetByID(user.UserID)
+	userRow, err := h.repo.GetByID(int32(userID))
 	if err != nil {
-		fmt.Println(strings.Repeat("-", 10))
-		fmt.Printf("db query error: %s\n", err)
-
-		return fmt.Errorf("user doesn't exist")
+		fmt.Printf("%s\n DB query error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("User doesn't exist")
 	}
 
 	ResponseJSON(
@@ -200,7 +203,8 @@ func (h *UserHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) 
 
 	var userInfo UserInfo
 	if err := json.NewDecoder(r.Body).Decode(&userInfo); err != nil {
-		return fmt.Errorf("Invalid json")
+		fmt.Println("Invalid json")
+		return fmt.Errorf("Something went wrong")
 	}
 
 	userInfo.FirstName = capitalize(strings.TrimSpace(userInfo.FirstName))
@@ -223,20 +227,16 @@ func (h *UserHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) 
 		return fmt.Errorf("%q is not a valid phone number", userInfo.Phone)
 	}
 
-	currUser, ok := auth.GetCurrentUser(r)
-	if !ok {
-		fmt.Println(strings.Repeat("-", 10))
-		fmt.Println("user request header error, unknown current user data")
-
-		return fmt.Errorf("undefined user")
+	userID, err := auth.GetCurrentUserID(r)
+	if err != nil {
+		fmt.Printf("%s\n Get user ID: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("Invalid credentials")
 	}
 
-	userRow, err := h.repo.GetByID(currUser.UserID)
+	userRow, err := h.repo.GetByID(int32(userID))
 	if err != nil {
-		fmt.Println(strings.Repeat("-", 10))
-		fmt.Printf("db query error: %s\n", err)
-
-		return fmt.Errorf("user doesn't exist")
+		fmt.Printf("%s\n DB query error: %s", strings.Repeat("-", 20), err)
+		return fmt.Errorf("User doesn't exist")
 	}
 
 	if userInfo.FirstName == userRow.FirstName &&
@@ -272,9 +272,7 @@ func (h *UserHandler) UpdateUserHandler(w http.ResponseWriter, r *http.Request) 
 	)
 
 	if err != nil {
-		fmt.Println(strings.Repeat("-", 10))
-		fmt.Printf("db update error: %s\n", err)
-
+		fmt.Printf("%s\n DB update error: %s", strings.Repeat("-", 20), err)
 		return fmt.Errorf("failed to update user info")
 	}
 
@@ -309,12 +307,4 @@ func isValidPhone(phone string) bool {
 	// E.164-style: optional leading +, then 7–15 digits
 	var phoneNumFormat = regexp.MustCompile(`^\+?[0-9]{7,15}$`)
 	return phoneNumFormat.MatchString(stripped)
-}
-
-func capitalize(s string) string {
-	if s == "" {
-		return s
-	}
-	s = strings.ToLower(s)
-	return strings.ToUpper(s[:1]) + s[1:]
 }
