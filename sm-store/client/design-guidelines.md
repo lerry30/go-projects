@@ -19,8 +19,8 @@
 
 ## 2. Typography
 
-- **Font**: Poppins (Google Fonts) — import via `@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap')`.
-- Apply `fontFamily: "'Poppins', sans-serif"` inline on the root wrapper and all inputs/buttons.
+- **Font**: Poppins (Google Fonts) — import {poppins} from '@/config/style'
+- Apply Poppins inline on the root wrapper and all inputs/buttons.
 - **Headings** (`h1`): `text-3xl font-bold text-gray-900 leading-tight tracking-tight`
 - **Subheading / tagline**: `text-sm text-gray-400`
 - **Field labels**: `text-xs font-semibold tracking-widest text-gray-400 uppercase`
@@ -48,14 +48,9 @@
 
 ## 4. Gradient
 
-The brand gradient is used on the CTA button and the background:
+The brand gradient is used on the background:
 
 ```
-/* Button */
-background: linear-gradient(135deg, #7C3AED 0%, #C026D3 60%, #f97316 120%);
-box-shadow: 0 8px 24px rgba(124,58,237,0.28);
-
-/* Right panel */
 background: linear-gradient(160deg, #4f1899 0%, #7C3AED 30%, #C026D3 62%, #f97316 100%);
 ```
 
@@ -75,32 +70,26 @@ background: linear-gradient(160deg, #4f1899 0%, #7C3AED 30%, #C026D3 62%, #f9731
 ```
 
 ### Form Fields (underline style)
+
 ```jsx
-<div>
-  <label className="block text-xs font-semibold tracking-widest text-gray-400 uppercase mb-2">
-    Field Label
-  </label>
-  <input
-    type="text"
-    placeholder="Placeholder"
-    className="w-full border-0 border-b border-gray-200 pb-2 pt-1 text-sm text-gray-900 bg-transparent outline-none placeholder-gray-300 focus:border-purple-600 transition-colors duration-200"
-    style={{ fontFamily: "'Poppins', sans-serif" }}
-  />
-</div>
+export function PrimaryField({ label, id, type="text", value, onChange, placeholder, disabled, required=false })
+```
+
+Import and use it like this.
+```jsx
+<PrimaryField label="Name" value={form.name} onChange={set('name')} />
 ```
 
 ### CTA Button (gradient, rounded)
 ```jsx
-<button
-  className="w-full py-3.5 rounded-2xl text-white text-sm font-semibold tracking-wide transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-  style={{
-    background: "linear-gradient(135deg, #7C3AED 0%, #C026D3 60%, #f97316 120%)",
-    boxShadow: "0 8px 24px rgba(124,58,237,0.28)",
-    fontFamily: "'Poppins', sans-serif",
-  }}
->
-  Action label →
-</button>
+export function GradientButton({ children, onClick, disabled, type = "button", className = "" })
+```
+
+import it and use it like this.
+```jsx
+<GradientButton className="w-full" onClick={updateUserDetails}>
+  Save Changes →
+</GradientButton>
 ```
 
 ### OR Divider
@@ -246,3 +235,135 @@ When building a new page, make sure it includes:
 - Use lucide-react icons
 - Only applies split screen layout on pages with form and any page that needs user to focus at the center for action like a modal.
 - Add blobs for full width layout pages like dashboard, profile and product display with dense content. I need the blob to be semi-transparent with the touch of gradient style above.
+
+
+## Database tables and columns
+
+-- product
+
+product_category
+  - parent_category_id
+  - category_name
+  - id
+
+product
+  - category_id
+  - name
+  - description
+  - product_image
+  - id
+
+variation
+  - category_id
+  - name
+  - id
+
+variation_option
+  - variation_id
+  - value
+  - id
+
+product_item
+  - product_id
+  - sku
+  - qty_in_stock
+  - product_image
+  - price
+  - created_at
+  - updated_at
+  - id
+
+product_configuration
+  - product_item_id
+  - variation_option_id
+
+-- payment
+
+payment_type
+  - value
+  - id
+
+user_payment_method
+  - user_id
+  - payment_type_id
+  - provider
+  - credit_card_number
+  - credit_card_exp_month
+  - credit_card_exp_day
+  - credit_card_secret_code
+  - name_on_card
+  - is_default
+  - created_at
+  - updated_at
+  - id
+
+-- shopping cart
+
+shopping_cart
+  - user_id
+  - id
+
+shopping_cart_item
+  - cart_id
+  - product_item_id
+  - qty
+  - created_at
+  - updated_at
+  - id
+
+-- order
+
+shipping_method
+  - name
+  - price
+  - id
+
+order_status
+  - status
+  - created_at
+  - id
+
+shop_order
+  - user_id
+  - order_date
+  - purchase_order_number
+  - payment_method_id
+  - shipping_address
+  - shipping_method
+  - order_total
+  - order_status
+  - id
+
+-- order line
+
+order_line
+  - product_item_id
+  - order_id
+  - qty
+  - price
+  - id
+
+-- reviews
+
+user_review
+  - user_id
+  - ordered_product_id
+  - rating_value
+  - comment
+  - created_at
+  - updated_at
+  - id
+
+-- promotion
+
+promotion
+  - name
+  - description
+  - discount_rate
+  - start_date
+  - end_date
+  - id
+
+promotion_category
+  - category_id
+  - promotion_id

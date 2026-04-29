@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Eye, EyeClosed } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { sendJSON } from '@/utils/send';
+import { apiRequest } from '@/utils/send';
 import { BASE_URL } from '@/config/server';
 import { SuccessModal, ErrorModal } from '@/components/Modal';
+import { zUser } from '@/store/user';
 
 import { GradientButton } from '@/components/Buttons';
 import { PrimaryField } from '@/components/Fields';
@@ -28,6 +29,8 @@ const Signup = () => {
 	const [agreed, setAgreed] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [modal, setModal] = useState({message: '', type: null});
+
+	const zSetUserState = zUser(state => state.setUserState);
 
 	const navigate = useNavigate()
 
@@ -66,8 +69,15 @@ const Signup = () => {
 			}
 			
 			setLoading(true);
-			const result = await sendJSON(`${BASE_URL}/signup`, tForm);
+			const result = await apiRequest(
+				`${BASE_URL}/signup`, 
+				{
+					method: 'POST',
+					body: JSON.stringify(tForm),
+				}
+			);
 			if(result) {
+				zSetUserState(true);
 				setModal({message: 'Account created successfully.', type: 'success'})
 				setTimeout(() => {
 					setModal({message: '', type: null});

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SuccessModal, ErrorModal } from '@/components/Modal';
-import { sendJSON } from '@/utils/send';
+import { apiRequest } from '@/utils/send';
 import { BASE_URL } from '@/config/server';
+import { zUser } from '@/store/user';
 
 import { GradientButton } from '@/components/Buttons';
 import { PrimaryField } from '@/components/Fields';
@@ -23,6 +24,8 @@ const Signin = () => {
 	const [loading, setLoading] = useState(false);
 	const [modal, setModal] = useState({message: '', type: null});
 
+	const zSetUserState = zUser(state => state.setUserState);
+
 	const navigate = useNavigate();
 
 	const handleSubmit = async (e) => {
@@ -39,8 +42,15 @@ const Signin = () => {
 				throw new Error('Fields are required');
 			
 			setLoading(true);
-			const result = await sendJSON(`${BASE_URL}/signin`, tForm);
+			const result = await apiRequest(
+				`${BASE_URL}/signin`, 
+				{
+					method: 'POST',
+					body: JSON.stringify(tForm),
+				}
+			);
 			if(result) {
+				zSetUserState(true);
 				setModal({message: 'Login successfully.', type: 'success'})
 				setTimeout(() => {
 					setModal({message: '', type: null});

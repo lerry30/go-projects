@@ -9,9 +9,9 @@ import { GradientButton, PlainButton } from '@/components/Buttons';
 import { PrimaryField } from '@/components/Fields'
 import { ErrorModal, Prompt } from '@/components/Modal';
 
-import { poppins, gradient } from '@/config/style';
+import { POPPINS, GRADIENT } from '@/config/style';
 
-import { apiRequest, sendJSON } from '@/utils/send';
+import { apiRequest } from '@/utils/send';
 import { formatDate } from '@/utils/datetime';
 import { BASE_URL } from '@/config/server';
 
@@ -48,13 +48,13 @@ function Logo() {
 	return (
 		<div className="flex items-center gap-2 mb-10">
 			<div className="w-8 h-8 rounded-xl flex items-center justify-center"
-				style={{ background: gradient }}>
+				style={{ background: GRADIENT }}>
 				<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
 					<path d="M7 1L9 5.5H13.5L9.8 8.5L11.2 13L7 10.2L2.8 13L4.2 8.5L0.5 5.5H5L7 1Z"
 						fill="white" />
 				</svg>
 			</div>
-			<span className="text-base font-semibold text-gray-900 tracking-tight" style={{ fontFamily: poppins }}>Luminary</span>
+			<span className="text-base font-semibold text-gray-900 tracking-tight" style={{ fontFamily: POPPINS }}>Luminary</span>
 		</div>
 	);
 }
@@ -64,7 +64,7 @@ function Toast({ msg }) {
 	if (!msg) return null;
 	return (
 		<div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-gray-900 text-white text-xs font-medium px-5 py-3 rounded-2xl shadow-xl"
-			style={{ fontFamily: poppins }}>
+			style={{ fontFamily: POPPINS }}>
 			<Check size={14} className="text-green-400" /> {msg}
 		</div>
 	);
@@ -110,14 +110,14 @@ function RightPanel({ activeTab }) {
 
 			<div className="relative z-10 flex flex-col justify-center px-12 py-14">
 				<div className="inline-flex items-center gap-2 self-start rounded-full px-4 py-1.5 mb-8 text-xs font-medium text-white/90 border border-white/20"
-					style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(4px)", fontFamily: poppins }}>
+					style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(4px)", fontFamily: POPPINS }}>
 					<span className="w-1.5 h-1.5 rounded-full bg-green-400" />
 					{c.badge}
 				</div>
 
 				<h2 className="text-2xl font-bold text-white leading-snug tracking-tight mb-3"
-					style={{ fontFamily: poppins }}>{c.headline}</h2>
-				<p className="text-sm text-white/70 leading-relaxed mb-8" style={{ fontFamily: poppins }}>{c.sub}</p>
+					style={{ fontFamily: POPPINS }}>{c.headline}</h2>
+				<p className="text-sm text-white/70 leading-relaxed mb-8" style={{ fontFamily: POPPINS }}>{c.sub}</p>
 
 				{/* SVG illustration */}
 				<svg viewBox="0 0 340 200" fill="none" className="w-full max-w-sm">
@@ -148,8 +148,8 @@ function RightPanel({ activeTab }) {
 						.map(({ num, label }) => (
 							<div key={label} className="flex-1 rounded-2xl px-4 py-3 border border-white/20"
 								style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(6px)" }}>
-								<div className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: poppins }}>{num}</div>
-								<div className="text-xs text-white/60 mt-0.5" style={{ fontFamily: poppins }}>{label}</div>
+								<div className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: POPPINS }}>{num}</div>
+								<div className="text-xs text-white/60 mt-0.5" style={{ fontFamily: POPPINS }}>{label}</div>
 							</div>
 						))}
 				</div>
@@ -255,16 +255,16 @@ function ProfileTab({ toast, loading }) {
 			<div className="flex items-center gap-5 mb-2">
 				<div className="relative">
 					<div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-xl font-bold"
-						style={{ background: gradient }}>AR</div>
+						style={{ background: GRADIENT }}>AR</div>
 					<button className="absolute -bottom-1 -right-1 w-6 h-6 rounded-lg bg-white shadow flex items-center justify-center border border-gray-100">
 						<Camera size={12} style={{ color: "#7C3AED" }} />
 					</button>
 				</div>
 				<div>
-					<p className="text-sm font-semibold text-gray-900" style={{ fontFamily: poppins }}>
+					<p className="text-sm font-semibold text-gray-900" style={{ fontFamily: POPPINS }}>
 						{fullName}
 					</p>
-					<p className="text-xs text-gray-400" style={{ fontFamily: poppins }}>
+					<p className="text-xs text-gray-400" style={{ fontFamily: POPPINS }}>
 						{memberSince}
 					</p>
 				</div>
@@ -452,27 +452,27 @@ function AddressTab({ toast, loading }) {
 						<div className="flex items-start justify-between">
 							<div>
 								<div className="flex items-center gap-2 mb-1">
-									<span className="text-sm text-gray-800" style={{ fontFamily: poppins }}>
+									<span className="text-sm text-gray-800" style={{ fontFamily: POPPINS }}>
 										{a.line1}
 									</span>
 									{a.is_default && (
-										<span className="text-[10px] px-2 py-0.5 rounded-full text-purple-600 bg-purple-100 font-semibold" style={{ fontFamily: poppins }}>
+										<span className="text-[10px] px-2 py-0.5 rounded-full text-purple-600 bg-purple-100 font-semibold" style={{ fontFamily: POPPINS }}>
 											Default
 										</span>
 									)}
 								</div>
 								{ a.line2 && (
-									<p className="text-xs text-gray-400" style={{ fontFamily: poppins }}>
+									<p className="text-xs text-gray-400" style={{ fontFamily: POPPINS }}>
 										{a.line2}
 									</p>
 								)}
-								<p className="text-xs font-semibold tracking-widest text-gray-400" style={{ fontFamily: poppins }}>
+								<p className="text-xs font-semibold tracking-widest text-gray-400" style={{ fontFamily: POPPINS }}>
 									{a.city}, {a.state} {a.zip}
 								</p>
 							</div>
 							<div className="flex gap-2">
 								{!a.is_default && (
-									<button onClick={() => setDefault(a.id)} className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors" style={{ fontFamily: poppins }}>
+									<button onClick={() => setDefault(a.id)} className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors" style={{ fontFamily: POPPINS }}>
 										Set default
 									</button>
 								)}
@@ -507,7 +507,7 @@ function AddressTab({ toast, loading }) {
 				) : (
 					<button onClick={() => setAdding(true)}
 						className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-purple-300 hover:text-purple-500 transition-all flex items-center justify-center gap-2"
-						style={{ fontFamily: poppins }}>
+						style={{ fontFamily: POPPINS }}>
 						<Plus size={14} /> Add New Address
 					</button>
 				)}
@@ -563,7 +563,7 @@ function PaymentTab({ toast, loading }) {
 
 	const CardIcon = ({ brand }) => (
 		<div className={`w-8 h-5 rounded flex items-center justify-center text-[9px] font-bold text-white ${brand === "Visa" ? "bg-blue-600" : "bg-orange-500"}`}
-			style={{ fontFamily: poppins }}>{brand === "Visa" ? "VISA" : "MC"}</div>
+			style={{ fontFamily: POPPINS }}>{brand === "Visa" ? "VISA" : "MC"}</div>
 	);
 
 	const remove = id => setCards(c => c.filter(x => x.id !== id));
@@ -577,13 +577,13 @@ function PaymentTab({ toast, loading }) {
 						<div className="flex items-center gap-3">
 							<CardIcon brand={c.brand} />
 							<div>
-								<p className="text-sm font-semibold text-gray-900" style={{ fontFamily: poppins }}>•••• •••• •••• {c.last4}</p>
-								<p className="text-xs text-gray-400" style={{ fontFamily: poppins }}>Expires {c.expiry}</p>
+								<p className="text-sm font-semibold text-gray-900" style={{ fontFamily: POPPINS }}>•••• •••• •••• {c.last4}</p>
+								<p className="text-xs text-gray-400" style={{ fontFamily: POPPINS }}>Expires {c.expiry}</p>
 							</div>
 						</div>
 						<div className="flex items-center gap-3">
-							{c.default && <span className="text-[10px] px-2 py-0.5 rounded-full text-purple-600 bg-purple-100 font-semibold" style={{ fontFamily: poppins }}>Default</span>}
-							{!c.default && <button onClick={() => setDefault(c.id)} className="text-xs text-purple-600 font-semibold" style={{ fontFamily: poppins }}>Set default</button>}
+							{c.default && <span className="text-[10px] px-2 py-0.5 rounded-full text-purple-600 bg-purple-100 font-semibold" style={{ fontFamily: POPPINS }}>Default</span>}
+							{!c.default && <button onClick={() => setDefault(c.id)} className="text-xs text-purple-600 font-semibold" style={{ fontFamily: POPPINS }}>Set default</button>}
 							<button onClick={() => remove(c.id)} className="text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
 						</div>
 					</div>
@@ -598,18 +598,18 @@ function PaymentTab({ toast, loading }) {
 						<PrimaryField label="Expiry" value={form.expiry} onChange={set("expiry")} placeholder="MM/YY" />
 						<PrimaryField label="CVC" value={form.cvc} onChange={set("cvc")} placeholder="•••" />
 					</div>
-					<div className="flex items-center gap-2 text-xs text-gray-400 mb-2" style={{ fontFamily: poppins }}>
+					<div className="flex items-center gap-2 text-xs text-gray-400 mb-2" style={{ fontFamily: POPPINS }}>
 						<Shield size={12} className="text-green-500" /> Your card details are encrypted & secure.
 					</div>
 					<div className="flex gap-3">
 						<GradientButton className="flex-1" onClick={() => { setAdding(false); toast("Card added!"); }}>Add Card →</GradientButton>
-						<button onClick={() => setAdding(false)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors" style={{ fontFamily: poppins }}>Cancel</button>
+						<button onClick={() => setAdding(false)} className="text-xs text-gray-400 hover:text-gray-600 transition-colors" style={{ fontFamily: POPPINS }}>Cancel</button>
 					</div>
 				</div>
 			) : (
 				<button onClick={() => setAdding(true)}
 					className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-xs font-semibold text-gray-400 hover:border-purple-300 hover:text-purple-500 transition-all flex items-center justify-center gap-2"
-					style={{ fontFamily: poppins }}>
+					style={{ fontFamily: POPPINS }}>
 					<Plus size={14} /> Add New Card
 				</button>
 			)}
@@ -633,20 +633,20 @@ function OrdersTab({ loading }) {
 								<Package size={16} className="text-gray-500" />
 							</div>
 							<div className="text-left">
-								<p className="text-sm font-semibold text-gray-900" style={{ fontFamily: poppins }}>{o.id}</p>
-								<p className="text-xs text-gray-400" style={{ fontFamily: poppins }}>{o.date} · {o.items} item{o.items > 1 ? "s" : ""}</p>
+								<p className="text-sm font-semibold text-gray-900" style={{ fontFamily: POPPINS }}>{o.id}</p>
+								<p className="text-xs text-gray-400" style={{ fontFamily: POPPINS }}>{o.date} · {o.items} item{o.items > 1 ? "s" : ""}</p>
 							</div>
 						</div>
 						<div className="flex items-center gap-3">
-							<span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${statusColor[o.status]}`} style={{ fontFamily: poppins }}>{o.status}</span>
-							<span className="text-sm font-semibold text-gray-900" style={{ fontFamily: poppins }}>{o.total}</span>
+							<span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${statusColor[o.status]}`} style={{ fontFamily: POPPINS }}>{o.status}</span>
+							<span className="text-sm font-semibold text-gray-900" style={{ fontFamily: POPPINS }}>{o.total}</span>
 							<ChevronDown size={14} className={`text-gray-400 transition-transform ${expanded === o.id ? "rotate-180" : ""}`} />
 						</div>
 					</button>
 
 					{expanded === o.id && (
 						<div className="border-t border-gray-100 px-4 py-4 bg-gray-50/40 space-y-3">
-							<div className="flex items-center gap-2 text-xs text-gray-500" style={{ fontFamily: poppins }}>
+							<div className="flex items-center gap-2 text-xs text-gray-500" style={{ fontFamily: POPPINS }}>
 								<div className="w-8 h-8 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-[10px]">IMG</div>
 								<span>Product details would appear here — connect to your order model.</span>
 							</div>
@@ -657,13 +657,13 @@ function OrdersTab({ loading }) {
 											{Array.from({ length: 5 }).map((_, i) => (
 												<Star key={i} size={12} fill={i < o.rating ? "#f97316" : "none"} stroke={i < o.rating ? "#f97316" : "#cbd5e1"} />
 											))}
-											<span className="text-xs text-gray-400 ml-1" style={{ fontFamily: poppins }}>Your rating</span>
+											<span className="text-xs text-gray-400 ml-1" style={{ fontFamily: POPPINS }}>Your rating</span>
 										</div>
 									) : (
-										<span className="text-xs text-gray-400" style={{ fontFamily: poppins }}>Not yet rated</span>
+										<span className="text-xs text-gray-400" style={{ fontFamily: POPPINS }}>Not yet rated</span>
 									)}
 								</div>
-								<button className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors flex items-center gap-1" style={{ fontFamily: poppins }}>
+								<button className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors flex items-center gap-1" style={{ fontFamily: POPPINS }}>
 									Reorder <ChevronRight size={12} />
 								</button>
 							</div>
@@ -686,7 +686,7 @@ function SettingsTab({ toast, loading }) {
 	const Toggle = ({ checked, onChange }) => (
 		<button onClick={() => onChange(!checked)}
 			className={`relative w-10 h-5 rounded-full transition-all duration-200 ${checked ? "" : "bg-gray-200"}`}
-			style={checked ? { background: gradient } : {}}>
+			style={checked ? { background: GRADIENT } : {}}>
 			<span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-200 ${checked ? "left-5" : "left-0.5"}`} />
 		</button>
 	);
@@ -697,7 +697,7 @@ function SettingsTab({ toast, loading }) {
 				<div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
 					<Icon size={13} className="text-gray-500" />
 				</div>
-				<span className="text-sm text-gray-700" style={{ fontFamily: poppins }}>{label}</span>
+				<span className="text-sm text-gray-700" style={{ fontFamily: POPPINS }}>{label}</span>
 			</div>
 			{children}
 		</div>
@@ -736,7 +736,7 @@ function SettingsTab({ toast, loading }) {
 		<div className="space-y-6">
 			{/* Notifications */}
 			<div>
-				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: poppins }}>Notifications</p>
+				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: POPPINS }}>Notifications</p>
 				<div className="rounded-2xl border border-gray-100 px-4">
 					<Row icon={ShoppingBag} label="Order updates">
 						<Toggle checked={notifications.orders} onChange={v => setNotifications(n => ({ ...n, orders: v }))} />
@@ -752,15 +752,15 @@ function SettingsTab({ toast, loading }) {
 
 			{/* Security */}
 			<div>
-				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: poppins }}>Security</p>
+				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: POPPINS }}>Security</p>
 				<div className="rounded-2xl border border-gray-100 px-4">
 					<Row icon={Lock} label="Change password">
-						<button className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors flex items-center gap-1" style={{ fontFamily: poppins }}>
+						<button className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors flex items-center gap-1" style={{ fontFamily: POPPINS }}>
 							Update <ChevronRight size={12} />
 						</button>
 					</Row>
 					<Row icon={Shield} label="Two-factor auth">
-						<button className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors flex items-center gap-1" style={{ fontFamily: poppins }}>
+						<button className="text-xs text-purple-600 font-semibold hover:text-purple-700 transition-colors flex items-center gap-1" style={{ fontFamily: POPPINS }}>
 							Enable <ChevronRight size={12} />
 						</button>
 					</Row>
@@ -769,10 +769,10 @@ function SettingsTab({ toast, loading }) {
 
 			{/* Danger zone */}
 			<div>
-				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: poppins }}>Account</p>
+				<p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3" style={{ fontFamily: POPPINS }}>Account</p>
 				<div className="rounded-2xl border border-gray-100 px-4">
 					<Row icon={LogOut} label="Sign out">
-						<button onClick={signOut} className="text-xs text-red-400 font-semibold hover:text-red-500 transition-colors flex items-center gap-1" style={{ fontFamily: poppins }}>
+						<button onClick={signOut} className="text-xs text-red-400 font-semibold hover:text-red-500 transition-colors flex items-center gap-1" style={{ fontFamily: POPPINS }}>
 							Sign out <ChevronRight size={12} />
 						</button>
 					</Row>
@@ -817,7 +817,7 @@ const Profile = () => {
 	};
 
 	return (
-		<div className="bg-gray-100 min-h-screen flex items-center justify-center p-4" style={{ fontFamily: poppins }}>
+		<div className="bg-gray-100 min-h-screen flex items-center justify-center p-4" style={{ fontFamily: POPPINS }}>
 			<div className="w-full h-full min-h-[calc(100vh-2rem)] rounded-3xl overflow-hidden shadow-2xl bg-white flex">
 
 				{/* LEFT PANEL */}
@@ -831,7 +831,7 @@ const Profile = () => {
 								key={id}
 								onClick={() => setActive(id)}
 								className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-xl text-[10px] font-semibold tracking-wide transition-all duration-200 ${active === id ? "bg-white shadow text-purple-600" : "text-gray-400 hover:text-gray-600"}`}
-								style={{ fontFamily: poppins }}
+								style={{ fontFamily: POPPINS }}
 							>
 								<Icon size={15} />
 								<span className="hidden sm:block">{label}</span>
@@ -841,10 +841,10 @@ const Profile = () => {
 
 					{/* Tab heading */}
 					<div className="mb-6">
-						<h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight" style={{ fontFamily: poppins }}>
+						<h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight" style={{ fontFamily: POPPINS }}>
 							{TABS.find(t => t.id === active)?.label}
 						</h1>
-						<p className="text-xs text-gray-400 mt-1" style={{ fontFamily: poppins }}>
+						<p className="text-xs text-gray-400 mt-1" style={{ fontFamily: POPPINS }}>
 							Manage your {TABS.find(t => t.id === active)?.label.toLowerCase()} details
 						</p>
 					</div>
