@@ -1,7 +1,8 @@
 // {credentials: 'include'} for auth or cookies
 
 export const getData = async (urlPath) => {
-    const res = await fetch(urlPath, {credentials: 'include'});
+    //const res = await fetch(urlPath, {credentials: 'include'});
+    const res = await fetch(urlPath);
 
     const payload = await res.json();
     if(!res.ok) {
