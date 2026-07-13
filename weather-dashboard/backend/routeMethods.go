@@ -3,6 +3,7 @@ package main
 import (
 	"backend/models"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -23,7 +24,8 @@ func (apiServer *APIServer) FilterCity(w http.ResponseWriter, r *http.Request) e
 	city.Name = strings.TrimSpace(cityName)
 
 	if city.Name == "" {
-		fmt.Fprintf(os.Stderr, "Error: empty string")
+		//fmt.Fprintf(os.Stderr, "Error: empty string")
+		log.Println("Error: empty string")
 		return fmt.Errorf("Empty data.")
 	}
 
@@ -31,7 +33,8 @@ func (apiServer *APIServer) FilterCity(w http.ResponseWriter, r *http.Request) e
 	var fData models.FilteredCities
 	fData, err := city.Filter() // return: struct, error
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %w", err.Error())
+		//fmt.Fprintf(os.Stderr, "Error: %w", err.Error())
+		log.Println("=======Error======", err.Error())
 		return fmt.Errorf("City name not found.")
 	}
 
