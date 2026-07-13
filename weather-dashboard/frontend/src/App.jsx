@@ -14,9 +14,10 @@ function App() {
 	// Get the current/nearest city, so by default it will display something in the dashboard
 	const { city, status, error } = useCurrentCity(); // use hook to fetch user city
 
+	const apiUrl = import.meta.env.VITE_API_URL;
+
 	useEffect(() => {
-		const serverUrl = 'http://localhost:8080';
-		zSetServerUrl(serverUrl);
+		zSetServerUrl(apiUrl);
 
 		// ------------------------------------------------------
 
@@ -27,7 +28,7 @@ function App() {
 		}
 		if(!city) return;
 
-		(async () => await zFetchWeatherForecast(serverUrl, city))();
+		(async () => await zFetchWeatherForecast(apiUrl, city))();
 	}, [city]);
 
 	return (
