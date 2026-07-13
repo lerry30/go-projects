@@ -12,7 +12,7 @@ function App() {
     const zFetchWeatherForecast = zForecast(state => state.fetchWeatherForecast);
 
 	// Get the current/nearest city, so by default it will display something in the dashboard
-	const { city, status, error } = useCurrentCity();
+	const { city, status, error } = useCurrentCity(); // use hook to fetch user city
 
 	useEffect(() => {
 		const serverUrl = 'http://localhost:8080';

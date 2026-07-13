@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	// It requires to load the godotenv to access .env file
+	// contents
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
