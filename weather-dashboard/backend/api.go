@@ -1,16 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"encoding/json"
 
 	"github.com/gorilla/mux"
 )
 
 type APIServer struct {
-	port string
+	port      string
 	externals map[string]any
 }
 
@@ -25,7 +25,7 @@ type APIError struct {
 // Initialize
 func NewAPIServer(port string) *APIServer {
 	return &APIServer{
-		port: port,
+		port:      port,
 		externals: make(map[string]any),
 	}
 }
@@ -39,9 +39,9 @@ func (apiServer *APIServer) AddExternalAPI(name string, address any) {
 func (apiServer *APIServer) Run() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/filter/{city}", makeHTTPHandleFunc(apiServer.FilterCity)).Methods("GET")
-	router.HandleFunc("/search/{city}", makeHTTPHandleFunc(apiServer.SearchCity)).Methods("GET")
-	router.HandleFunc("/forecast/{city}", makeHTTPHandleFunc(apiServer.Forecast)).Methods("GET")
+	router.HandleFunc("/api/filter/{city}", makeHTTPHandleFunc(apiServer.FilterCity)).Methods("GET")
+	router.HandleFunc("/api/search/{city}", makeHTTPHandleFunc(apiServer.SearchCity)).Methods("GET")
+	router.HandleFunc("/api/forecast/{city}", makeHTTPHandleFunc(apiServer.Forecast)).Methods("GET")
 
 	fmt.Println("Server starting on port:", apiServer.port[1:])
 	log.Fatal(http.ListenAndServe(apiServer.port, router))
