@@ -10,6 +10,8 @@ import Tooltip from './tooltip';
 import SaveCity from './saveCity';
 
 const Main = () => {
+    // This main dashboard view only based on this zustand store data
+    // to display something on screen
     const zForecastCityName = zForecast(state => state.cityName);
     const zForecastCountry = zForecast(state => state.country);
     const zForecastSunrise = zForecast(state => state.sunrise);

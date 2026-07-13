@@ -1,28 +1,27 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"time"
 	"net/http"
 	"net/url"
-	"encoding/json"
+	"time"
 
 	"backend/models"
 )
 
 type OpenWeather struct {
-	id string
-	apiKey string
-	baseUrl string
+	id         string
+	apiKey     string
+	baseUrl    string
 	httpClient *http.Client
 }
 
 // ----
 // Initialize
-func NewOpenWeather(id, key string) *OpenWeather {
+func NewOpenWeather(key string) *OpenWeather {
 	return &OpenWeather{
-		id: id,
-		apiKey: key,
+		apiKey:  key,
 		baseUrl: "https://api.openweathermap.org/data/2.5",
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,

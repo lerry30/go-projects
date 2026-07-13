@@ -47,10 +47,10 @@ const Navbar = () => {
 				{/* Nav links */}
 				<div className="hidden md:flex items-center gap-8">
 					{["Shop", "Collections", "Deals", "About"].map((link) => (
-						<a key={link} href="#"
+						<Link key={link} to={link.trim().toLowerCase().replaceAll(' ', '-')}
 							className="text-sm font-medium text-gray-600 hover:text-purple-700 transition-colors">
 							{link}
-						</a>
+						</Link>
 					))}
 				</div>
 

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"strings"
-	"os"
-	"net/http"
 	"backend/models"
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -14,11 +14,11 @@ import (
 func (apiServer *APIServer) FilterCity(w http.ResponseWriter, r *http.Request) error {
 	// this struct city holds the city name from the request URL parameter
 	var city models.City
- 
+
 	// mux to get the necessary parameters
 	vars := mux.Vars(r)
 	cityName := vars["city"]
- 
+
 	// remove white spaces on both ends
 	city.Name = strings.TrimSpace(cityName)
 
@@ -26,7 +26,7 @@ func (apiServer *APIServer) FilterCity(w http.ResponseWriter, r *http.Request) e
 		fmt.Fprintf(os.Stderr, "Error: empty string")
 		return fmt.Errorf("Empty data.")
 	}
- 
+
 	// this struct holds the city names for suggestions
 	var fData models.FilteredCities
 	fData, err := city.Filter() // return: struct, error

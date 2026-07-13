@@ -17,40 +17,28 @@ import {
 import { Link } from 'react-router-dom';
 import { POPPINS } from '@/config/style';
 
-import Navbar from '@/components/Navbar';
+import { GradientButton } from '@/components/Buttons';
 
-import WirelessHeadPhone from '@/assets/wireless-headphone-fb-sm.webp';
-import SmartWatch from '@/assets/smart-watch-fb-sm.webp';
-import LeatherBag from '@/assets/leather-bag-fb-sm.webp';
-import Shoe from '@/assets/shoe-fb-sm.webp';
+import Navbar from '@/sections/Navbar';
+import Footer from '@/sections/Footer';
+
+import ElectronicsImg from '@/assets/electronics-cat-sm.webp';
+import FashionImg from '@/assets/fashion-cat-sm.webp';
+import HomeAccessoriesImg from '@/assets/home-accessories-cat-sm.webp';
+import GymImg from '@/assets/gym-cat-sm.webp';
+import BeautyImg from '@/assets/beauty-cat-sm.webp';
+import BooksImg from '@/assets/books-cat-sm.webp';
+
+import WirelessHeadPhoneImg from '@/assets/wireless-headphone-fb-sm.webp';
+import SmartWatchImg from '@/assets/smart-watch-fb-sm.webp';
+import LeatherBagImg from '@/assets/leather-bag-fb-sm.webp';
+import ShoeImg from '@/assets/shoe-fb-sm.webp';
 
 // ─── Config ─────────────────────────────────────────────────────────────────
 const GRADIENT = "linear-gradient(160deg, #4f1899 0%, #7C3AED 30%, #C026D3 62%, #f97316 100%)";
 const BLOB_STYLE = "absolute rounded-full pointer-events-none";
 
 // ─── Shared Components ───────────────────────────────────────────────────────
-function GradientButton({ children, onClick, className = "", outlined = false }) {
-	if (outlined) {
-		return (
-			<button
-				onClick={onClick}
-				className={`relative inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-sm border-2 border-purple-600 text-purple-600 hover:bg-purple-50 transition-all duration-200 ${className}`}
-				style={{ fontFamily: POPPINS }}
-			>
-				{children}
-			</button>
-		);
-	}
-	return (
-		<button
-			onClick={onClick}
-			className={`relative inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl font-semibold text-sm text-white shadow-lg hover:shadow-purple-400/40 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 ${className}`}
-			style={{ background: GRADIENT, fontFamily: POPPINS }}
-		>
-			{children}
-		</button>
-	);
-}
 
 function Badge({ children, color = "purple" }) {
 	const colors = {
@@ -66,7 +54,6 @@ function Badge({ children, color = "purple" }) {
 		</span>
 	);
 }
-
 
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
@@ -108,12 +95,12 @@ function Hero() {
 
 					<div className="flex flex-wrap gap-4 mb-12">
 						<Link to="/shop">
-							<GradientButton className="text-base px-8 py-4 h-full">
+							<GradientButton className="text-base px-8 py-4 h-full cursor-pointer">
 								Explore Collections <ArrowRight size={16} />
 							</GradientButton>
 						</Link>
 						<Link to="/">
-							<GradientButton outlined className="text-base px-8 py-4">
+							<GradientButton outlined className="text-base px-8 py-4 cursor-pointer">
 								<Play size={16} /> Watch Story
 							</GradientButton>
 						</Link>
@@ -243,16 +230,16 @@ function Hero() {
 // ─── Category Strip ───────────────────────────────────────────────────────────
 function Categories() {
 	const cats = [
-		{ name: "Electronics", icon: "⚡", color: "from-violet-500 to-purple-700" },
-		{ name: "Fashion", icon: "👗", color: "from-pink-500 to-rose-600" },
-		{ name: "Home & Living", icon: "🏠", color: "from-orange-400 to-amber-600" },
-		{ name: "Sports", icon: "🏋️", color: "from-green-400 to-emerald-600" },
-		{ name: "Beauty", icon: "💄", color: "from-fuchsia-500 to-pink-600" },
-		{ name: "Books", icon: "📚", color: "from-sky-400 to-blue-600" },
+		{ name: "Electronics", icon: "⚡", img: ElectronicsImg, color: "from-violet-500 to-purple-700" },
+		{ name: "Fashion", icon: "👗", img: FashionImg, color: "from-pink-500 to-rose-600" },
+		{ name: "Home & Living", icon: "🏠", img: HomeAccessoriesImg, color: "from-orange-400 to-amber-600" },
+		{ name: "Sports", icon: "🏋️", img: GymImg, color: "from-green-400 to-emerald-600" },
+		{ name: "Beauty", icon: "💄", img: BeautyImg, color: "from-fuchsia-500 to-pink-600" },
+		{ name: "Books", icon: "📚", img: BooksImg, color: "from-sky-400 to-blue-600" },
 	];
 
 	return (
-		<section className="py-20 bg-white relative overflow-hidden" style={{ fontFamily: POPPINS }}>
+		<section className="py-20 bg-white relative" style={{ fontFamily: POPPINS }}>
 			{/* Blobs */}
 			<div className={`${BLOB_STYLE} top-0 right-0 w-96 h-96 opacity-5`}
 				style={{ background: "radial-gradient(circle, #7C3AED, transparent 70%)" }} />
@@ -269,16 +256,16 @@ function Categories() {
 					</a>
 				</div>
 
-				<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+				<div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
 					{cats.map((cat) => (
 						<button 
 							key={cat.name}
-							className="group relative flex flex-col items-center gap-3 p-6 rounded-2xl bg-gray-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-gray-100"
+							className="group relative flex flex-col items-center gap-3 p-5 rounded-2xl bg-gray-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border border-gray-100 cursor-pointer"
 						>
-							<div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform duration-200`}>
-								{cat.icon}
+							<div className={`p-7 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-200`}>
+								<img src={cat.img} alt={cat.name} className="object-cover rounded-lg" />
 							</div>
-							<span className="text-xs font-semibold text-gray-700 text-center">{cat.name}</span>
+							<span className="text-2xs font-semibold text-gray-700 text-center group-hover:translate-y-3 transition-transform duration-200">{cat.name}</span>
 						</button>
 					))}
 				</div>
@@ -355,7 +342,7 @@ function FeaturedProducts() {
 			rating: 4.9, 
 			reviews: 1204, 
 			badge: "Best Seller", 
-			img: WirelessHeadPhone,
+			img: WirelessHeadPhoneImg,
 			gradient: "from-violet-100 to-purple-200" 
 		},
 		{ 
@@ -365,7 +352,7 @@ function FeaturedProducts() {
 			rating: 4.8, 
 			reviews: 876, 
 			badge: "40% Off", 
-			img: SmartWatch,
+			img: SmartWatchImg,
 			gradient: "from-slate-100 to-gray-200" 
 		},
 		{ 
@@ -375,7 +362,7 @@ function FeaturedProducts() {
 			rating: 4.7, 
 			reviews: 532, 
 			badge: "New", 
-			img: LeatherBag, 
+			img: LeatherBagImg, 
 			gradient: "from-amber-100 to-orange-200" 
 		},
 		{ 
@@ -385,7 +372,7 @@ function FeaturedProducts() {
 			rating: 4.9, 
 			reviews: 2140, 
 			badge: "Hot", 
-			img: Shoe,
+			img: ShoeImg,
 			gradient: "from-rose-100 to-pink-200" 
 		},
 	];
@@ -597,81 +584,19 @@ function Newsletter() {
 	);
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer() {
-	const copyrightLinks = {
-		"Privacy Policy": "/privpolicy", 
-		"Terms of Service": "/termsofservice", 
-		"Cookie Policy": "/cukiepolicy",
-	};
-
-	return (
-		<footer className="bg-gray-900 text-white pt-16 pb-8" style={{ fontFamily: POPPINS }}>
-			<div className="max-w-7xl mx-auto px-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-				{/* Brand */}
-				<div>
-					<div className="flex items-center gap-2 mb-4">
-						<div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: GRADIENT }}>
-							<Sparkles size={14} className="text-white" />
-						</div>
-						<span className="text-base font-bold tracking-tight">Luminary</span>
-					</div>
-					<p className="text-sm text-gray-400 leading-relaxed">Shop smarter. Live brighter. Your one-stop destination for everything you love.</p>
-				</div>
-
-				{/* Links */}
-				{[
-					{ title: "Shop", links: ["New Arrivals", "Best Sellers", "Sale", "Brands"] },
-					{ title: "Support", links: ["Help Center", "Track Order", "Returns", "Contact Us"] },
-					{ title: "Company", links: ["About", "Careers", "Blog", "Press"] },
-				].map((col) => (
-					<div key={col.title}>
-						<p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">{col.title}</p>
-						<ul className="space-y-2">
-							{col.links.map((l) => (
-								<li key={l}><a href="#" className="text-sm text-gray-400 hover:text-white transition-colors">{l}</a></li>
-							))}
-						</ul>
-					</div>
-				))}
-			</div>
-
-			<div className="max-w-7xl mx-auto px-6 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-				<p className="text-xs text-gray-500">© {new Date().getFullYear()} Luminary. All rights reserved.</p>
-				<div className="flex gap-6">
-					{Object.entries(copyrightLinks).map((l) => {
-						console.log(l[1]);
-						return (
-						<a 
-							key={l[0]} 
-							href={l[1]} 
-							className="text-xs text-gray-500 hover:text-white transition-colors"
-						>
-							{l[0]}
-						</a>
-					)})}
-				</div>
-			</div>
-		</footer>
-	);
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
 	return (
-		<>
-			<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-			<div style={{ fontFamily: POPPINS }}>
-				<Navbar />
-				<Hero />
-				<Categories />
-				<FeaturedProducts />
-				<PromoBanner />
-				<TrustStrip />
-				<Testimonials />
-				<Newsletter />
-				<Footer />
-			</div>
-		</>
+		<div style={{ fontFamily: POPPINS }}>
+			<Navbar />
+			<Hero />
+			<Categories />
+			<FeaturedProducts />
+			<PromoBanner />
+			<TrustStrip />
+			<Testimonials />
+			<Newsletter />
+			<Footer />
+		</div>
 	);
 }

@@ -23,6 +23,7 @@ const Sidebar = () => {
             try {
                 const response = await getData(`${zServerUrl}/filter/${cityInput}`);
                 if(response && response?.data?.length > 0) {
+                    // Fill the suggestion list
                     setSuggestionData(response.data);
                     setIsSuggestionOpen(true);
                 }
@@ -41,15 +42,20 @@ const Sidebar = () => {
             }
             
             city = city.trim().toLowerCase();
+            // if user input is not in the list, but matched the
+            // leading characters for auto completion
             if(!suggestionData.includes(city)) {
                 const firstCity = suggestionData[0];
+                // On key press enter. Validate if the user input
+                // is the same as suggested data.
                 if(city.length > firstCity.length) {
                     throw new Error('City not found.');
                 }
-                // this is the only purpose for this 
-                // useRef, to autofill the input field
+                // The only purpose for this  useRef is to autofill
+                // the input field when the user input leading characters
+                // are matched with the suggested data
                 cityInputField.current.value = firstCity;
-                city = firstCity;
+                city = firstCity; // assign for auto completion
             } else {
                 // if item is selected from the list
                 cityInputField.current.value = city;

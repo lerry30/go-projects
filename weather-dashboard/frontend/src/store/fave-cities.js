@@ -23,7 +23,7 @@ export const zFaveCities = create(
         isSaved: (name) => {
             name = String(name).trim().toLowerCase();
             if(!name) return false;
-            return get().cities?.includes(name) || false;
+            return get().cities?.includes(name) || false; // should use ??
         },
     }), {
         name: 'store-fave-cities',

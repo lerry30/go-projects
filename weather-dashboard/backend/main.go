@@ -1,7 +1,20 @@
 package main
 
+import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
+
 func main() {
-	ow := NewOpenWeather("524901", "26f04947ccd1591b1fdea1d787dee4c7")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	key := string(os.Getenv("OPEN_WEATHER_API_KEY"))
+	ow := NewOpenWeather(key)
 
 	server := NewAPIServer(":8080")
 	server.AddExternalAPI("open-weather", ow)
