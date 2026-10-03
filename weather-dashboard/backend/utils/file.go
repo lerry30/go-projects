@@ -1,9 +1,9 @@
 package utils
 
 import (
+	"encoding/csv"
 	"fmt"
 	"os"
-	"encoding/csv"
 )
 
 func WriteFile(data string, filename string) error {
@@ -12,14 +12,13 @@ func WriteFile(data string, filename string) error {
 		return fmt.Errorf("Error: %w\n", err)
 	}
 	defer file.Close()
-	
+
 	_, err = file.WriteString(data)
 	if err != nil {
 		return fmt.Errorf("Error: %w\n", err)
 	}
 	return nil
 }
-
 
 func ReadCSV(filename string) ([][]string, error) {
 	file, err := os.Open(filename)

@@ -1,4 +1,4 @@
-package repository
+package gen_queries
 
 import (
 	"context"
@@ -8,32 +8,26 @@ import (
 	"strings"
 	"time"
 
+	"tracker/internal/platform/postgres"
+
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 )
-
-type Primitive interface {
-	int | int32 | string | bool
-}
-
-type DBTX interface {
-	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
-}
 
 func QueryRow[T Primitive, R any](dbPool DBTX, table string, column string, value T) (R, error) {
 	var zero R
 
-	if err := ValidateIdentifier(table); err != nil {
+	table, err := postgres.QuoteIdentifier(table)
+	if err != nil {
 		return zero, fmt.Errorf("invalid table name: %w", err)
 	}
-	if err := ValidateIdentifier(column); err != nil {
+
+	quotedColumn, err := postgres.QuoteIdentifier(column)
+	if err != nil {
 		return zero, fmt.Errorf("invalid table column name: %w", err)
 	}
 
 	ph := fmt.Sprintf("@%s", column)
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s=%s", table, column, ph)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s=%s", table, quotedColumn, ph)
 
 	arg := make(pgx.NamedArgs, 1)
 	arg[column] = value
@@ -54,14 +48,18 @@ func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
 	var zero R
 	columns := slices.Collect(maps.Keys(args))
 
-	// Whitelist validation to prevent SQL injection
-	if err := ValidateIdentifier(table); err != nil {
+	table, err := postgres.QuoteIdentifier(table)
+	if err != nil {
 		return zero, fmt.Errorf("invalid table name: %w", err)
 	}
-	for _, col := range columns {
-		if err := ValidateIdentifier(col); err != nil {
+
+	quotedColumns := make([]string, len(columns))
+	for i, col := range columns {
+		nCol, err := postgres.QuoteIdentifier(col)
+		if err != nil {
 			return zero, fmt.Errorf("invalid column name %q: %w", col, err)
 		}
+		quotedColumns[i] = nCol
 	}
 
 	// Build placeholders: (@name, @email, @password, ...)
@@ -71,9 +69,11 @@ func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
 	}
 
 	// Build column list: (col1, col2, col3)
-	cols := strings.Join(columns, ", ")
+	cols := strings.Join(quotedColumns, ", ")
 	ph := strings.Join(placeholders, ", ")
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) RETURNING *;", table, cols, ph)
+
+	fmt.Println(query)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -91,25 +91,34 @@ func Update[T Primitive, R any](dbPool DBTX, table string, args pgx.NamedArgs, c
 	var zero R
 	columns := slices.Collect(maps.Keys(args))
 
-	// Whitelist validation to prevent SQL injection
-	if err := ValidateIdentifier(table); err != nil {
+	table, err := postgres.QuoteIdentifier(table)
+	if err != nil {
 		return zero, fmt.Errorf("invalid table name: %w", err)
 	}
-	for _, col := range columns {
-		if err := ValidateIdentifier(col); err != nil {
+
+	quotedColumns := make([]string, len(columns))
+	for i, col := range columns {
+		nCol, err := postgres.QuoteIdentifier(col)
+		if err != nil {
 			return zero, fmt.Errorf("invalid column name %q: %w", col, err)
 		}
+		quotedColumns[i] = nCol
+	}
+
+	condCol, err := postgres.QuoteIdentifier(column)
+	if err != nil {
+		return zero, fmt.Errorf("invalid column name: %w", err)
 	}
 
 	// Build column = placeholders: (name = @name, email = @email, password = @password, ...)
-	sqlParams := make([]string, len(columns))
-	for i, col := range columns {
-		sqlParams[i] = fmt.Sprintf("%s=@%s", col, col)
+	sqlParams := make([]string, len(quotedColumns))
+	for i, col := range quotedColumns {
+		sqlParams[i] = fmt.Sprintf("%s=@%s", col, columns[i])
 	}
 
 	pr := strings.Join(sqlParams, ", ")
 	phCol := fmt.Sprintf("@%s", column)
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE %s=%s RETURNING *;", table, pr, column, phCol)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE %s=%s RETURNING *;", table, pr, condCol, phCol)
 
 	// where clause value
 	args[column] = value
