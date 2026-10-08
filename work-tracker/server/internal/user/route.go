@@ -19,7 +19,13 @@ func Route(db *pgxpool.Pool) func(r *router.Router) {
 
 	return func(r *router.Router) {
 		router := r.Mux
-		router.HandleFunc("/test", handler.MakeHTTPHandleFunc(usrHttpHandler.SignUpHandler)).Methods("POST")
+		authRouter := r.AuthUserSubrouter()
+
+		router.HandleFunc("/signup", handler.MakeHTTPHandleFunc(usrHttpHandler.SignUpHandler)).Methods("POST")
+		router.HandleFunc("/signin", handler.MakeHTTPHandleFunc(usrHttpHandler.SignInHandler)).Methods("POST")
+
+		// starts with -> /auth/
+		authRouter.HandleFunc("/signout", handler.MakeHTTPHandleFunc(usrHttpHandler.SignOutHandler)).Methods("POST")
 
 		// Authenticated User Subrouter
 		// authUserSubrouter := r.AuthUserSubrouter()

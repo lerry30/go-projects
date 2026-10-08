@@ -8,6 +8,8 @@ import (
 
 	"tracker/internal/shared/httpresponse"
 	"tracker/internal/shared/utils"
+	"tracker/internal/shared/token/jwt"
+	"tracker/internal/shared/account"
 )
 
 type UserHttpHandler struct {
@@ -23,7 +25,7 @@ func NewUserHttpHandler(usrRepo UserRepository) *UserHttpHandler {
 func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) httpresponse.Response {
 	defer r.Body.Close()
 
-	var userReq userRequest
+	var userReq userSignUpRequest
 
 	var resError httpresponse.ErrorResponse
 
@@ -37,11 +39,13 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 	userReq.Username = strings.TrimSpace(userReq.Username)
 	userReq.Password = strings.TrimSpace(userReq.Password)
 
-	if userReq.FirstName == "" ||
-	userReq.LastName == "" ||
-	userReq.Username == "" ||
-	userReq.Password == "" {
-		resError.WriteMessage(http.StatusBadRequest, "missing require fields")
+	// DONE: update the empty validation to length based characters
+
+	if len(userReq.FirstName) >= 2 ||
+	len(userReq.LastName) > 2 ||
+	len(userReq.Username) > 2 ||
+	len(userReq.Password) > 4 {
+		resError.WriteMessage(http.StatusBadRequest, "Insufficient number of characters")
 		return resError
 	}
 
@@ -65,3 +69,46 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 	resOK.WriteMessage(http.StatusOK, "User successfully signed up")
 	return resOK
 }
+
+func (u *UserHttpHandler) SignInHandler(w http.ResponseWriter, r *http.Request) httpresponse.Response {
+	defer r.Body.Close()
+
+	var userReq userSignInRequest
+
+	var resError httpresponse.ErrorResponse
+
+	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
+		resError.WriteMessage(http.StatusBadRequest, "invalid JSON")
+		return resError
+	}
+
+	userReq.Username = strings.TrimSpace(userReq.Username)
+	userReq.Password = strings.TrimSpace(userReq.Password)
+
+	if userReq.Username == "" || userReq.Password == "" {
+		resError.WriteMessage(http.StatusBadRequest, "missing required fields")
+		return resError
+	}
+
+	token, err := u.usrRepo.SignIn(userReq)
+	if err != nil {
+		resError.WriteMessage(http.StatusBadRequest, "invalid credentials")
+		return resError
+	}
+
+	w.Header().Set("Authorization", "Bearer "+token)
+
+	var resOK httpresponse.OKResponse
+	resOK.WriteMessage(http.StatusOK, "User successfully logged in")
+	return resOK
+}
+
+func (u *UserHttpHandler) SignOutHandler(w http.ResponseWriter, r *http.Request) httpresponse.Response {
+	user, _ := account.GetCurrentUser(r)
+	// Blacklist this token so it can't be reused
+	jwt.Store.Revoke(user.ID, user.ExpiresAt.Time)
+
+	var resOK httpresponse.OKResponse
+	resOK.WriteMessage(http.StatusOK, "You've successfully logged out")
+	return resOK
+} 

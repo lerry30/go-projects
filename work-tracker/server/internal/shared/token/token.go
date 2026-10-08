@@ -1,4 +1,4 @@
-package jwt
+package token
 
 import (
 	"fmt"
@@ -18,7 +18,7 @@ func GenerateToken(userID, userName string) (string, error) {
 		UserID: userID,
 		UserName: userName,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24*time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24*time.Hour*5)),
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			ID: userID + fmt.Sprintf("%d", time.Now().UnixNano()),
 		},

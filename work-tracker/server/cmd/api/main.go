@@ -13,6 +13,7 @@ import (
 	/// "tracker/internal/platform/redis"
 	"tracker/internal/platform/router"
 	"tracker/internal/user"
+	"tracker/internal/dashboard"
 
 	"github.com/joho/godotenv"
 )
@@ -47,6 +48,7 @@ func main() {
 	// HTTP enpoint registration
 	registrars := []RouteRegistrar{
 		user.Route(db.Pool),
+		dashboard.Route(db.Pool),
 	}
 
 	for _, registrar := range(registrars) {

@@ -2,7 +2,6 @@ package router
 
 import (
 	"tracker/internal/shared/middleware"
-	"tracker/internal/shared/middleware/jwt"
 
 	"github.com/gorilla/mux"
 )
@@ -30,6 +29,6 @@ func NewRouter() *Router {
 
 func (r *Router) AuthUserSubrouter() *mux.Router {
 	subrouter := r.Mux.PathPrefix("/auth/").Subrouter()
-	subrouter.Use(jwt.JWT)
+	subrouter.Use(middleware.JWT)
 	return subrouter
 }
