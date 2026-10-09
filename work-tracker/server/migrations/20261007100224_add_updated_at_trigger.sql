@@ -33,8 +33,8 @@ EXECUTE FUNCTION set_updated_at();
 -- +goose StatementEnd
 
 -- +goose StatementBegin
-CREATE TRIGGER trigger_time_updated_at
-BEFORE UPDATE ON time
+CREATE TRIGGER trigger_time_logs_updated_at
+BEFORE UPDATE ON time_logs
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 -- +goose StatementEnd
@@ -43,6 +43,6 @@ EXECUTE FUNCTION set_updated_at();
 DROP TRIGGER IF EXISTS trigger_users_updated_at ON users;
 DROP TRIGGER IF EXISTS trigger_tracker_updated_at ON tracker;
 DROP TRIGGER IF EXISTS trigger_secrets_updated_at ON secrets;
-DROP TRIGGER IF EXISTS trigger_time_updated_at ON time;
+DROP TRIGGER IF EXISTS trigger_time_logs_updated_at ON time_logs;
 
 DROP FUNCTION IF EXISTS set_updated_at();

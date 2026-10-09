@@ -73,8 +73,6 @@ func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
 	ph := strings.Join(placeholders, ", ")
 	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) RETURNING *;", table, cols, ph)
 
-	fmt.Println(query)
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

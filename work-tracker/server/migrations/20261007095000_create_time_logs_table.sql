@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE time(
+CREATE TABLE time_logs(
     employee_id INTEGER REFERENCES users(id),
     tracker_id INTEGER REFERENCES tracker(id),
     login TIME NOT NULL,
@@ -16,4 +16,4 @@ CREATE TABLE time(
 );
 
 -- +goose Down
-DROP TABLE time;
+DROP TABLE time_logs;

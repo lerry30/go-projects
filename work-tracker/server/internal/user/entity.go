@@ -12,12 +12,14 @@ type UsersEntity struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
+/*
 var AllowedSortColumns = map[string]string{
 	"first_name": "first_name",
 	"last_name": "last_name",
 	"created_at": "created_at",
 	"updated_at": "updated_at",
 }
+*/
 
 // Table column names
 type UsersColumns struct {

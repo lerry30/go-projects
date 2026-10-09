@@ -9,15 +9,15 @@ import (
 
 func Route(db *pgxpool.Pool) func(r *router.Router) {
 	// repository
-	dshbrdService := NewDashboardService(db)
+	dashboardService := NewDashboardService(db)
 
 	// handler
-	dshbrdRepo := NewDashboardHttpHandler(dshbrdService)
+	dashboarRepo := NewDashboardHttpHandler(dashboardService)
 
 	return func(r *router.Router) {
 		authRouter := r.AuthUserSubrouter()
 
 		// starts with -> /auth/
-		authRouter.HandleFunc("/dashboard", handler.MakeHTTPHandleFunc(dshbrdRepo.DashboardHandler)).Methods("GET")
+		authRouter.HandleFunc("/dashboard", handler.MakeHTTPHandleFunc(dashboarRepo.DashboardHandler)).Methods("GET")
 	}
 }

@@ -13,12 +13,12 @@ import (
 )
 
 type UserHttpHandler struct {
-	usrRepo UserRepository
+	userRepo UserRepository
 }
 
-func NewUserHttpHandler(usrRepo UserRepository) *UserHttpHandler {
+func NewUserHttpHandler(userRepo UserRepository) *UserHttpHandler {
 	return &UserHttpHandler{
-		usrRepo: usrRepo,
+		userRepo: userRepo,
 	}
 }
 
@@ -41,23 +41,23 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 
 	// DONE: update the empty validation to length based characters
 
-	if len(userReq.FirstName) >= 2 ||
-	len(userReq.LastName) > 2 ||
-	len(userReq.Username) > 2 ||
-	len(userReq.Password) > 4 {
+	if len(userReq.FirstName) < 2 ||
+	len(userReq.LastName) < 2 ||
+	len(userReq.Username) < 4 ||
+	len(userReq.Password) < 4 {
 		resError.WriteMessage(http.StatusBadRequest, "Insufficient number of characters")
 		return resError
 	}
 
 	// TODO: filter user input values (e.g., validate characters)
 
-	dbUser, err := u.usrRepo.GetByUsername(userReq.Username)
+	dbUser, err := u.userRepo.GetByUsername(userReq.Username)
 	if dbUser != nil || err == nil {
 		resError.WriteMessage(http.StatusConflict, "record already exists")
 		return resError
 	}
 
-	token, err := u.usrRepo.Create(userReq)
+	token, err := u.userRepo.Create(userReq)
 	if err != nil {
 		resError.WriteMessage(http.StatusBadRequest, "failed to signup user")
 		return resError
@@ -90,7 +90,7 @@ func (u *UserHttpHandler) SignInHandler(w http.ResponseWriter, r *http.Request) 
 		return resError
 	}
 
-	token, err := u.usrRepo.SignIn(userReq)
+	token, err := u.userRepo.SignIn(userReq)
 	if err != nil {
 		resError.WriteMessage(http.StatusBadRequest, "invalid credentials")
 		return resError

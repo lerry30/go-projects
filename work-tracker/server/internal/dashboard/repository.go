@@ -1,5 +1,5 @@
 package dashboard
 
 type DashboardRepository interface {
-	GetAll()
+	GetAll(userID int64) (*EmployeeTimeLogsEntity, error)
 }
