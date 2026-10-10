@@ -32,37 +32,32 @@ func (d *DashboardHttpHandler) DashboardHandler(w http.ResponseWriter, r *http.R
 		fmt.Println(err)
 	}
 
-	//fmt.Printf("%v", allData)
-//
-	//var resOK httpresponse.OKResponse
-	//resOK.WriteMessage(http.StatusOK, "dashboard")
-//
-	//return resOK
+	var res httpresponse.DataResponse
 
-	var res DashboarResponse
-	res.WriteResponse(
-		http.StatusOK,
-		allData.FirstName,
-		allData.LastName,
-		allData.Username,
-		allData.UserCreatedAt,
-		allData.UserUpdatedAt,
-		allData.Login,
-		allData.FirstBreakOut,
-		allData.FirstBreakIN,
-		allData.LunchOut,
-		allData.LunchIn,
-		allData.SecondBreakOut,
-		allData.SecondBreakIn,
-		allData.Logout,
-		allData.TimeCreatedAt,
-		allData.TimeUpdatedAt,
-		allData.TrackerSpreadSheetID,
-		allData.TrackerYear,
-		allData.TrackerMonth,
-		allData.TrackerCreatedAt,
-		allData.TrackerUpdatedAt,
-	)
+	resData := DashboardDataResponse{
+		FirstName: allData.FirstName,
+		LastName: allData.LastName,
+		Username: allData.Username,
+		UserCreatedAt: allData.UserCreatedAt,
+		UserUpdatedAt: allData.UserUpdatedAt,
+		Login: allData.Login,
+		FirstBreakOut: allData.FirstBreakOut,
+		FirstBreakIn: allData.FirstBreakIn,
+		LunchOut: allData.LunchOut,
+		LunchIn: allData.LunchIn,
+		SecondBreakOut: allData.SecondBreakOut,
+		SecondBreakIn: allData.SecondBreakIn,
+		Logout: allData.Logout,
+		TimeCreatedAt: allData.TimeCreatedAt,
+		TimeUpdatedAt: allData.TimeUpdatedAt,
+		TrackerSpreadSheetID: allData.TrackerSpreadSheetID,
+		TrackerYear: allData.TrackerYear,
+		TrackerMonth: allData.TrackerMonth,
+		TrackerCreatedAt: allData.TrackerCreatedAt,
+		TrackerUpdatedAt: allData.TrackerUpdatedAt,
+	}
+
+	res.WriteBody(http.StatusOK, resData)
 
 	return res
 }

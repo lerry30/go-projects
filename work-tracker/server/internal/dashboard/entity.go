@@ -14,7 +14,7 @@ type EmployeeTimeLogsEntity struct {
 	TimeID int32 `db:"time_id"`
 	Login time.Time `db:"time_login"`
 	FirstBreakOut time.Time `db:"time_first_break_out"`
-	FirstBreakIN time.Time `db:"time_first_break_in"`
+	FirstBreakIn time.Time `db:"time_first_break_in"`
 	LunchOut time.Time `db:"time_lunch_out"`
 	LunchIn time.Time `db:"time_lunch_in"`
 	SecondBreakOut time.Time `db:"time_second_break_out"`
