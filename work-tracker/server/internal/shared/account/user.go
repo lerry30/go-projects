@@ -9,14 +9,14 @@ import (
 	"tracker/internal/shared/token/jwt"
 )
 
-// GetCurrentUser is a helper
-func GetCurrentUser(r *http.Request) (*token.Claims, bool) {
+// CurrentUser is a helper
+func CurrentUser(r *http.Request) (*token.Claims, bool) {
 	claims, ok := r.Context().Value(jwt.ContextKeyUser).(*token.Claims)
 	return claims, ok
 }
 
-func GetCurrentUserID(r *http.Request) (int64, error) {
-	idStr, ok := GetCurrentUser(r)
+func CurrentUserID(r *http.Request) (int64, error) {
+	idStr, ok := CurrentUser(r)
 	if !ok {
 		return 0, fmt.Errorf("user doesn't exist")
 	}

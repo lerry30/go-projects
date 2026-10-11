@@ -1,4 +1,4 @@
-package user
+package users
 
 import (
 	"strings"
@@ -104,7 +104,7 @@ func (u *UserHttpHandler) SignInHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (u *UserHttpHandler) SignOutHandler(w http.ResponseWriter, r *http.Request) httpresponse.Response {
-	user, _ := account.GetCurrentUser(r)
+	user, _ := account.CurrentUser(r)
 	// Blacklist this token so it can't be reused
 	jwt.Store.Revoke(user.ID, user.ExpiresAt.Time)
 

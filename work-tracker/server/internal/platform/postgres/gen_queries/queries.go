@@ -27,7 +27,7 @@ func QueryRow[T Primitive, R any](dbPool DBTX, table string, column string, valu
 	}
 
 	ph := fmt.Sprintf("@%s", column)
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s=%s", table, quotedColumn, ph)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s=%s;", table, quotedColumn, ph)
 
 	arg := make(pgx.NamedArgs, 1)
 	arg[column] = value
@@ -41,7 +41,12 @@ func QueryRow[T Primitive, R any](dbPool DBTX, table string, column string, valu
 	}
 	defer rows.Close()
 
-	return pgx.CollectOneRow(rows, pgx.RowToStructByName[R]) // R, error
+	rowObj, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[R]) // R, error
+	if err != nil {
+		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
+	}
+
+	return rowObj, nil
 }
 
 func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
@@ -82,7 +87,12 @@ func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
 	}
 	defer rows.Close()
 
-	return pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
+	rowObj, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
+	if err != nil {
+		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
+	}
+
+	return rowObj, nil
 }
 
 func Update[T Primitive, R any](dbPool DBTX, table string, args pgx.NamedArgs, column string, value T) (R, error) {
@@ -130,5 +140,10 @@ func Update[T Primitive, R any](dbPool DBTX, table string, args pgx.NamedArgs, c
 	}
 	defer rows.Close()
 
-	return pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
+	rowObj, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
+	if err != nil {
+		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
+	}
+
+	return rowObj, nil
 }

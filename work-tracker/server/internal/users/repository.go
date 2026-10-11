@@ -1,4 +1,4 @@
-package user
+package users
 
 type UserRepository interface {
 	GetByUsername(username string) (*UsersEntity, error)

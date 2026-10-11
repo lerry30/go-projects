@@ -1,4 +1,4 @@
-package user
+package users
 
 type userSignUpRequest struct {
 	FirstName string `json:"first-name"`

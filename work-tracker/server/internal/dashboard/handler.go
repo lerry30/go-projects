@@ -1,7 +1,6 @@
 package dashboard
 
 import (
-	"fmt"
 	"net/http"
 
 	"tracker/internal/shared/account"
@@ -21,15 +20,16 @@ func NewDashboardHttpHandler(dashboardRepo DashboardRepository) *DashboardHttpHa
 func (d *DashboardHttpHandler) DashboardHandler(w http.ResponseWriter, r *http.Request) httpresponse.Response {
 	var resError httpresponse.ErrorResponse
 
-	userID, err := account.GetCurrentUserID(r)
+	userID, err := account.CurrentUserID(r)
 	if err != nil {
 		resError.WriteMessage(http.StatusBadRequest, "user not found")
 		return resError
 	}
 
-	allData, err := d.dashboardRepo.GetAll(userID)
+	allData, err := d.dashboardRepo.DashboardData(userID)
 	if err != nil {
-		fmt.Println(err)
+		resError.WriteMessage(http.StatusInternalServerError, "")
+		return resError
 	}
 
 	var res httpresponse.DataResponse

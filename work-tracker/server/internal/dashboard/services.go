@@ -19,7 +19,7 @@ func NewDashboardService(db *pgxpool.Pool) *DashboardService {
 	}
 }
 
-func (d *DashboardService) GetAll(userID int64) (*EmployeeTimeLogsEntity, error) {
+func (d *DashboardService) DashboardData(userID int64) (*EmployeeTimeLogsEntity, error) {
 	args := pgx.NamedArgs{"user_id": userID}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
