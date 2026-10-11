@@ -5,6 +5,7 @@ import (
 
 	"tracker/internal/shared/httpresponse"
 	"tracker/internal/shared/account"
+	"tracker/internal/platform/logger"
 )
 
 type AppScriptsHandler struct {
@@ -22,13 +23,16 @@ func (a *AppScriptsHandler) AppScriptHandler(w http.ResponseWriter, r *http.Requ
 
 	userID, err := account.CurrentUserID(r)
 	if err != nil {
+		logger.LogError("user not found", err)
 		resErr.WriteMessage(http.StatusBadRequest, "user not found")
 		return resErr
 	}
 
 	dbAppScript, err := a.appScriptsRepo.AppScript(int32(userID))
 	if err != nil {
+		logger.LogError("failed to retrieve appscript data in db", err)
 		resErr.WriteMessage(http.StatusInternalServerError, "internal server error")
+		return resErr
 	}
 
 	resAppScript := AppScriptsResponse{

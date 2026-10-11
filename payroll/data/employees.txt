@@ -18,3 +18,4 @@
 18 | CHU-1436 | Charlotte Sanchez | Marketing | 526.81 | 2025-11-07T04:01:18Z
 19 | CHU-1483 | Mason Brown | Admin | 607.75 | 2025-11-17T00:39:48Z
 20 | CHU-4243 | Joseph Martinez | Admin | 546.52 | 2025-11-06T04:16:43Z
+21 | NDO-8194 | John Lerry Samson | Backend Dev | 2.00 | 2026-10-11T14:59:21Z

@@ -10,6 +10,7 @@ import (
 	"tracker/internal/shared/utils"
 	"tracker/internal/shared/token/jwt"
 	"tracker/internal/shared/account"
+	"tracker/internal/platform/logger"
 )
 
 type UserHttpHandler struct {
@@ -30,6 +31,7 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 	var resError httpresponse.ErrorResponse
 
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
+		logger.LogError("invalid JSON(http request body)", err)
 		resError.WriteMessage(http.StatusBadRequest, "invalid JSON")
 		return resError
 	}
@@ -45,6 +47,7 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 	len(userReq.LastName) < 2 ||
 	len(userReq.Username) < 4 ||
 	len(userReq.Password) < 4 {
+		logger.LogError("Insufficient number of characters", nil)
 		resError.WriteMessage(http.StatusBadRequest, "Insufficient number of characters")
 		return resError
 	}
@@ -52,13 +55,20 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 	// TODO: filter user input values (e.g., validate characters)
 
 	dbUser, err := u.userRepo.GetByUsername(userReq.Username)
+	if err != nil {
+		logger.LogError("checking if user already in the db - error", err)
+		resError.WriteMessage(http.StatusInternalServerError, "system failed, try again later")
+		return resError
+	}
 	if dbUser != nil || err == nil {
+		logger.LogError("record already exists", nil)
 		resError.WriteMessage(http.StatusConflict, "record already exists")
 		return resError
 	}
 
 	token, err := u.userRepo.Create(userReq)
 	if err != nil {
+		logger.LogError("failed to signup user", err)
 		resError.WriteMessage(http.StatusBadRequest, "failed to signup user")
 		return resError
 	}
@@ -78,6 +88,7 @@ func (u *UserHttpHandler) SignInHandler(w http.ResponseWriter, r *http.Request) 
 	var resError httpresponse.ErrorResponse
 
 	if err := json.NewDecoder(r.Body).Decode(&userReq); err != nil {
+		logger.LogError("invalid JSON(http request body)", err)
 		resError.WriteMessage(http.StatusBadRequest, "invalid JSON")
 		return resError
 	}
@@ -86,12 +97,14 @@ func (u *UserHttpHandler) SignInHandler(w http.ResponseWriter, r *http.Request) 
 	userReq.Password = strings.TrimSpace(userReq.Password)
 
 	if userReq.Username == "" || userReq.Password == "" {
+		logger.LogError("empty fields", nil)
 		resError.WriteMessage(http.StatusBadRequest, "missing required fields")
 		return resError
 	}
 
 	token, err := u.userRepo.SignIn(userReq)
 	if err != nil {
+		logger.LogError("failed to signin user", err)
 		resError.WriteMessage(http.StatusBadRequest, "invalid credentials")
 		return resError
 	}
