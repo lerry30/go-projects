@@ -26,14 +26,14 @@ func (a *AppScriptsHandler) AppScriptHandler(w http.ResponseWriter, r *http.Requ
 	userID, err := account.CurrentUserID(r)
 	if err != nil {
 		logger.LogError("user not found", err)
-		resErr.WriteMessage(http.StatusBadRequest, "user not found")
+		resErr.WriteMessage(http.StatusNotFound, "user not found")
 		return resErr
 	}
 
 	dbAppScript, err := a.appScriptsRepo.AppScript(int32(userID))
 	if err != nil {
 		logger.LogError("failed to retrieve appscript data in db", err)
-		resErr.WriteMessage(http.StatusInternalServerError, "internal server error")
+		resErr.WriteMessage(http.StatusInternalServerError, "internal server error, please try again later")
 		return resErr
 	}
 
@@ -74,7 +74,7 @@ func (a *AppScriptsHandler) UpdateAppScriptHandler(w http.ResponseWriter, r *htt
 	userID, err := account.CurrentUserID(r)
 	if err != nil {
 		logger.LogError("user id doesn't exists", err)
-		resErr.WriteMessage(http.StatusBadRequest, "user not found")
+		resErr.WriteMessage(http.StatusNotFound, "user not found")
 		return resErr
 	}
 
