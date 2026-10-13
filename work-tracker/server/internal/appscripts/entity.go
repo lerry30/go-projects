@@ -23,7 +23,7 @@ type AppScriptsColumns struct {
 
 const TableName = "appscripts"
 
-var AppscriptsCols = AppScriptsColumns{
+var AppScriptsCols = AppScriptsColumns{
 	ID: "id",
 	EmployeeID: "employee_id",
 	Endpoint: "appscript_endpoint",

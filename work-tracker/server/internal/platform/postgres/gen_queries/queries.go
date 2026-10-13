@@ -144,6 +144,6 @@ func Update[T Primitive, R any](dbPool DBTX, table string, args pgx.NamedArgs, c
 	if err != nil {
 		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
 	}
-
+	
 	return rowObj, nil
 }

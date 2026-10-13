@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE appscripts(
-    employee_id INTEGER REFERENCES users(id),
+    employee_id INTEGER REFERENCES users(id) UNIQUE,
     appscript_endpoint VARCHAR(255) NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
