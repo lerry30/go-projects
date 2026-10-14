@@ -16,5 +16,6 @@ func Route(db *pgxpool.Pool) func(r *router.Router) {
 
 		// starts with -> /auth/
 		authRouter.HandleFunc("/tracker", handler.MakeHTTPHandleFunc(trackerHttpHandler.TrackerHandler)).Methods("GET")
+		authRouter.HandleFunc("/tracker", handler.MakeHTTPHandleFunc(trackerHttpHandler.UpdateTrackerHandler)).Methods("PATCH")
 	}
 }

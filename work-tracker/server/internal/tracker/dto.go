@@ -4,6 +4,12 @@ import (
 	"time"
 )
 
+type TrackerRequest struct {
+	SpreadSheetID string `json:"spread-sheet-id"`
+	Year int16 `json:"year"`
+	Month int16 `json:"month"`
+}
+
 type TrackerResponse struct {
 	ID int32 `json:"id"`
 	SpreadSheetID string `json:"spread-sheet-id"`

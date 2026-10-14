@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"tracker/internal/shared/middleware"
 
 	"github.com/gorilla/mux"
@@ -21,6 +23,12 @@ func NewRouter() *Router {
 	router := mux.NewRouter()
 
 	router.Use(middleware.CORS)
+	router.Use(func(next http.Handler) http.Handler {
+		// Middleware for cap limit that prevents large 
+		// size of payload from the clients request. 1MB 
+		// maximum number of bytes allowed.
+		return middleware.LimitBody(next, 1<<20) // 1MB
+	})
 
 	return &Router{
 		Mux: router,

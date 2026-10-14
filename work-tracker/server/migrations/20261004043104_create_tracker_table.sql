@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE tracker(
-    employee_id INTEGER REFERENCES users(id),
+    employee_id INTEGER REFERENCES users(id) UNIQUE,
     spread_sheet_id VARCHAR(255) NOT NULL,
     year SMALLINT NOT NULL,
     month SMALLINT NOT NULL CHECK (month BETWEEN 1 AND 12),
