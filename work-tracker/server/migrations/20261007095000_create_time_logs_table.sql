@@ -1,7 +1,6 @@
 -- +goose Up
 CREATE TABLE time_logs(
     employee_id INTEGER REFERENCES users(id) UNIQUE,
-    tracker_id INTEGER REFERENCES tracker(id),
     login TIME NOT NULL,
     first_break_out TIME NOT NULL,
     first_break_in TIME NOT NULL,

@@ -15,6 +15,7 @@ import (
 	"tracker/internal/users"
 	"tracker/internal/appscripts"
 	"tracker/internal/tracker"
+	"tracker/internal/timelogs"
 
 	"github.com/joho/godotenv"
 )
@@ -51,6 +52,7 @@ func main() {
 		users.Route(db.Pool),
 		appscripts.Route(db.Pool),
 		tracker.Route(db.Pool),
+		timelogs.Route(db.Pool),
 	}
 
 	for _, registrar := range(registrars) {
