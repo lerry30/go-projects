@@ -86,8 +86,8 @@ func (t *TimeLogsHttpHandler) UpdateTimeLogsHandler(w http.ResponseWriter, r *ht
 	}
 
 	resolvedLogsSeq := ResolveNightShiftSequence(tmSeq)
-	// Shift should not span 24 hours
-	if resolvedLogsSeq[len(resolvedLogsSeq)-1].Sub(resolvedLogsSeq[0]) >= 24*time.Hour {
+	// Shift should not span 10 hours
+	if resolvedLogsSeq[len(resolvedLogsSeq)-1].Sub(resolvedLogsSeq[0]) >= 10*time.Hour {
 		logger.LogError("times are not in a valid order", nil)
 		resErr.WriteMessage(http.StatusBadRequest, "times are not in a valid order")
 		return resErr
