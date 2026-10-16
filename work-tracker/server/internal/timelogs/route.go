@@ -16,5 +16,6 @@ func Route(db *pgxpool.Pool) func(r *router.Router) {
 		authRouter := r.AuthUserSubrouter()
 
 		authRouter.HandleFunc("/time-logs", handler.MakeHTTPHandleFunc(timeLogsHttpHandler.TimeLogsHandler)).Methods("GET")
+		authRouter.HandleFunc("/time-logs", handler.MakeHTTPHandleFunc(timeLogsHttpHandler.UpdateTimeLogsHandler)).Methods("PATCH")
 	}
 }
