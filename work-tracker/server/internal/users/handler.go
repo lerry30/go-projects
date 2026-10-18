@@ -60,9 +60,9 @@ func (u *UserHttpHandler) SignUpHandler(w http.ResponseWriter, r *http.Request) 
 		resError.WriteMessage(http.StatusInternalServerError, "system failed, try again later")
 		return resError
 	}
-	if dbUser != nil || err == nil {
+	if dbUser.ID > 0 {
 		logger.LogError("record already exists", nil)
-		resError.WriteMessage(http.StatusConflict, "record already exists")
+		resError.WriteMessage(http.StatusConflict, "invalid credentials")
 		return resError
 	}
 

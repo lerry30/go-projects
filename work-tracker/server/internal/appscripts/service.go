@@ -29,7 +29,7 @@ func (a *AppScriptsService) AppScript(userID int32) (*AppScriptsEntity, error) {
 	return &dbAppScript, nil
 }
 
-func (a *AppScriptsService) UpdateAppScript(endpoint string, userID int32) (int32, error) {
+func (a *AppScriptsService) UpdateAppScriptEndpoint(endpoint string, userID int32) (int32, error) {
 	args := make(pgx.NamedArgs, 2)
 	args[AppScriptsCols.EmployeeID] = userID
 	args[AppScriptsCols.Endpoint] = endpoint
@@ -49,4 +49,15 @@ func (a *AppScriptsService) UpdateAppScript(endpoint string, userID int32) (int3
 	}
 
 	return appScriptData.ID, nil
+}
+
+func (a *AppScriptsService) UpdateAppScriptStatus(status string, userID int32) (int32, error) {
+	args := make(pgx.NamedArgs, 1)
+	args[AppScriptsCols.Status] = status
+
+	dbAppScript, err := gen_queries.Update[int32, AppScriptsEntity](a.db, TableName, args, AppScriptsCols.EmployeeID, userID)
+	if err != nil {
+		return 0, fmt.Errorf("db error: %w", err)
+	}
+	return dbAppScript.ID, nil
 }

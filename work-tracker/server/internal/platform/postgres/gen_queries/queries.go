@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 	"time"
+	"errors"
 
 	"tracker/internal/platform/postgres"
 
@@ -42,6 +43,10 @@ func QueryRow[T Primitive, R any](dbPool DBTX, table string, column string, valu
 	defer rows.Close()
 
 	rowObj, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[R]) // R, error
+	if errors.Is(err, pgx.ErrNoRows) { // zero rows
+		return zero, nil
+	}
+
 	if err != nil {
 		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
 	}
@@ -88,6 +93,10 @@ func Create[R any](dbPool DBTX, table string, args pgx.NamedArgs) (R, error) {
 	defer rows.Close()
 
 	rowObj, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
+	if errors.Is(err, pgx.ErrNoRows) { // zero rows
+		return zero, nil
+	}
+
 	if err != nil {
 		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
 	}
@@ -141,6 +150,10 @@ func Update[T Primitive, R any](dbPool DBTX, table string, args pgx.NamedArgs, c
 	defer rows.Close()
 
 	rowObj, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[R])
+	if errors.Is(err, pgx.ErrNoRows) {
+		return zero, nil
+	}
+
 	if err != nil {
 		return zero, fmt.Errorf("failed to convert database row to struct: %w", err)
 	}

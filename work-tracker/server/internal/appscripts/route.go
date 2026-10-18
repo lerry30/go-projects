@@ -9,12 +9,13 @@ import (
 
 func Route(db *pgxpool.Pool) func(r *router.Router){
 	appScriptService := NewAppScriptsService(db)
-	appScriptHttpHandler := NewAppScriptsHandler(appScriptService)
+	appScriptHttpHandler := NewAppScriptsHttpHandler(appScriptService)
 
 	return func(r *router.Router) {
 		authRouter := r.AuthUserSubrouter()
 
 		authRouter.HandleFunc("/appscript", handler.MakeHTTPHandleFunc(appScriptHttpHandler.AppScriptHandler)).Methods("GET")
-		authRouter.HandleFunc("/appscript", handler.MakeHTTPHandleFunc(appScriptHttpHandler.UpdateAppScriptHandler)).Methods("PATCH")
+		authRouter.HandleFunc("/appscript-endpoint", handler.MakeHTTPHandleFunc(appScriptHttpHandler.UpdateAppScriptEndpointHandler)).Methods("PATCH")
+		authRouter.HandleFunc("/appscript-status", handler.MakeHTTPHandleFunc(appScriptHttpHandler.UpdateAppScriptStatusHandler)).Methods("PATCH")
 	}
 }
