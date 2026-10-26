@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type UserSched struct {
+type User struct {
 	UserID int32 `db:"user_id"`
 	FirstName string `db:"first_name"`
 	LastName string `db:"last_name"`
@@ -24,7 +24,7 @@ type UserSched struct {
 	SchedTimeLogs map[string][]time.Time
 }
 
-func (s *UserSched) Spec(weekday string, index int) string {
-	slot := s.SchedTimeLogs[weekday][index]
+func (u *User) Spec(weekday string, index int) string {
+	slot := u.SchedTimeLogs[weekday][index]
 	return fmt.Sprintf("%d %d * * %d", slot.Minute(), slot.Hour(), int(slot.Weekday()))
 }

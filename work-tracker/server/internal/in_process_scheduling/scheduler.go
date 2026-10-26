@@ -9,20 +9,6 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-/*
-func RunSchedule(db *pgxpool.Pool) {
-	schedulesService := NewSchedulesService(db)
-
-	usersSched := Sched(schedulesService)
-
-	//fmt.Println(usersSched[0].FirstName)
-
-	for _, t := range usersSched[0].SchedTimeLogs["Monday"] {
-		fmt.Println(t.Format())
-	}
-}
-	*/
-
 type Scheduler struct {
 	backgroundService *cron.Cron
 	ctx context.Context
@@ -43,12 +29,13 @@ func NewScheduler(loc *time.Location, db *pgxpool.Pool) (*Scheduler, error) {
 		cancel: cancel,
 	}
 
+	// Retrived data from the database
 	schedulesService := NewSchedulesService(db)
-	usersSched := Sched(schedulesService)
+	usersWithScheds := NewUsersWithSchedules(schedulesService)
 
 	weekdaysSched := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
 
-	for _, user := range usersSched {
+	for _, user := range usersWithScheds.users {
 		for _, wds := range weekdaysSched {
 			//fmt.Println(user.SchedTimeLogs[wds][0].Format("2006-01-02 15:04:05"))
 			for i, _ := range user.SchedTimeLogs[wds] {
