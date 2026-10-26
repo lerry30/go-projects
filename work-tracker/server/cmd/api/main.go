@@ -17,6 +17,8 @@ import (
 	"tracker/internal/tracker"
 	"tracker/internal/timelogs"
 
+	"tracker/internal/in_process_scheduling"
+
 	"github.com/joho/godotenv"
 )
 
@@ -44,6 +46,16 @@ func main() {
 
 	// var rdb *redis.RedisConnection = redis.NewRedisConnection(redisAddr, redisPassword)
 	// defer rdb.Close()
+
+	//in_process_scheduling.RunSchedule(db.Pool)
+	loc, _ := time.LoadLocation("Asia/Manila")
+	sched, err := in_process_scheduling.NewScheduler(loc, db.Pool)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sched.Start()
+
+	// -----
 	
 	var rt *router.Router = router.NewRouter()
 
@@ -73,20 +85,23 @@ func main() {
 	}()
 
 	// Main goroutine is now free - sit here and wait for OS signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit // blocks here until CTRL+C or system termination
+	ctxQuit, quit := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer quit()
+	<-ctxQuit.Done()
+	// blocks here until CTRL+C or system termination
 
 	// Shutdown sequence (fully reachable now)
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	// Gracefully shutdown the server (waits for active requests to finish)
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("forced shutdown: %v", err)
 	}
+
+	_ = sched.Stop(ctx)
 
 	// Close Postgres and Redis connetion
 	// rdb.Close()
