@@ -8,17 +8,21 @@ import (
 	"tracker/internal/platform/postgres/gen_queries"
 	"tracker/internal/shared/utils"
 
+	"tracker/internal/datachange"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5"
 )
 
 type TimeLogsService struct {
 	db *pgxpool.Pool
+	notif *datachange.NotifyScheduler
 }
 
-func NewTimeLogsService(db *pgxpool.Pool) *TimeLogsService {
+func NewTimeLogsService(db *pgxpool.Pool, notif *datachange.NotifyScheduler) *TimeLogsService {
 	return &TimeLogsService{
 		db: db,
+		notif: notif,
 	}
 }
 
@@ -56,5 +60,8 @@ func (t *TimeLogsService) UpdateTimeLogs(timeLogs *TimeLogsRequest, userID int32
 		return 0, fmt.Errorf("db failed to convert row to struct: %w", err)
 	}
 
+	if !t.notif.Trigger(userID) {
+		return 0, fmt.Errorf("trigger failed: updating time logs")
+	}
 	return dbTimeLogs.ID, nil
 }

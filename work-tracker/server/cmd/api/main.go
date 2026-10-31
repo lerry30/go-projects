@@ -18,6 +18,7 @@ import (
 	"tracker/internal/timelogs"
 
 	"tracker/internal/in_process_scheduling"
+	"tracker/internal/datachange"
 
 	"github.com/joho/godotenv"
 )
@@ -39,6 +40,11 @@ func main() {
 
 	var port string = ":" + os.Getenv("PORT")
 
+	// The main goroutine is now free to wait for an OS signal.
+	// Place this at the end of the initialization process so the application
+	// can gracefully shut down running goroutines and release resources.
+	ctxQuit, quit := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+
 	// -----
 
 	var db *postgres.PostgresConnection = postgres.NewPostgresConnection(dbConnStr)
@@ -47,13 +53,13 @@ func main() {
 	// var rdb *redis.RedisConnection = redis.NewRedisConnection(redisAddr, redisPassword)
 	// defer rdb.Close()
 
-	//in_process_scheduling.RunSchedule(db.Pool)
 	loc, _ := time.LoadLocation("Asia/Manila")
-	sched, err := in_process_scheduling.NewScheduler(loc, db.Pool)
-	if err != nil {
-		log.Fatal(err)
-	}
-	sched.Start()
+	sched := in_process_scheduling.Init(db.Pool, loc)
+	sched.StartAll()
+
+	go in_process_scheduling.UpdateSchedules(ctxQuit, sched)
+
+	notifier := datachange.NewNotifyScheduler(sched)
 
 	// -----
 	
@@ -61,10 +67,10 @@ func main() {
 
 	// HTTP enpoint registration
 	registrars := []RouteRegistrar{
-		users.Route(db.Pool),
-		appscripts.Route(db.Pool),
-		tracker.Route(db.Pool),
-		timelogs.Route(db.Pool),
+		users.Route(db.Pool, notifier),
+		appscripts.Route(db.Pool, notifier),
+		tracker.Route(db.Pool, notifier),
+		timelogs.Route(db.Pool, notifier),
 	}
 
 	for _, registrar := range(registrars) {
@@ -84,8 +90,6 @@ func main() {
 		}
 	}()
 
-	// Main goroutine is now free - sit here and wait for OS signal
-	ctxQuit, quit := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer quit()
 	<-ctxQuit.Done()
 	// blocks here until CTRL+C or system termination
@@ -101,7 +105,7 @@ func main() {
 		log.Fatalf("forced shutdown: %v", err)
 	}
 
-	_ = sched.Stop(ctx)
+	_ = sched.StopAll(ctx)
 
 	// Close Postgres and Redis connetion
 	// rdb.Close()

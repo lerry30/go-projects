@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"context"
 	"time"
+	//"log"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	//"tracker/internal/webhook"
+
 	"github.com/robfig/cron/v3"
 )
 
@@ -13,11 +15,15 @@ type Scheduler struct {
 	backgroundService *cron.Cron
 	ctx context.Context
 	cancel context.CancelFunc
+	user *User
 }
 
-func NewScheduler(loc *time.Location, db *pgxpool.Pool) (*Scheduler, error) {
+var weekdaysSched = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
+var serviceIdentities = []string{"login", "1st-break-out", "1st-break-in", "lunch-out", "lunch-in", "2nd-break-out", "2nd-break-in", "logout"}
+
+func NewScheduler(loc *time.Location, user *User) *Scheduler {
 	ctx, cancel := context.WithCancel(context.Background())
-	s := &Scheduler{
+	return &Scheduler{
 		backgroundService: cron.New(
 			cron.WithLocation(loc),
 			cron.WithChain(
@@ -27,30 +33,37 @@ func NewScheduler(loc *time.Location, db *pgxpool.Pool) (*Scheduler, error) {
 		),
 		ctx: ctx,
 		cancel: cancel,
+		user: user,
 	}
+}
 
-	// Retrived data from the database
-	schedulesService := NewSchedulesService(db)
-	usersWithScheds := NewUsersWithSchedules(schedulesService)
+func (s *Scheduler) Create() error {
+	//service := webhook.NewWebhookAppscript(user.FirstName, user.LastName, user.Endpoint, user.Status, user.SpreadSheetID)
+	for _, wds := range weekdaysSched {
+		//fmt.Println(user.SchedTimeLogs[wds][0].Format("2006-01-02 15:04:05"))
+		for i, _ := range s.user.SchedTimeLogs[wds] {
+			//fmt.Println(user.Spec(wds, i))
+			/*var srvIt string
+			if i >= len(serviceIdentities) {
+				srvIt = "log"
+			} else {
+				srvIt = serviceIdentities[i]
+			}*/
 
-	weekdaysSched := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
-
-	for _, user := range usersWithScheds.users {
-		for _, wds := range weekdaysSched {
-			//fmt.Println(user.SchedTimeLogs[wds][0].Format("2006-01-02 15:04:05"))
-			for i, _ := range user.SchedTimeLogs[wds] {
-				//fmt.Println(user.Spec(wds, i))
-				if _, err := s.backgroundService.AddFunc(user.Spec(wds, i), func() {
-					fmt.Println("test")
-				}); err != nil {
-					cancel()
-					return nil, err
+			if _, err := s.backgroundService.AddFunc(s.user.Spec(wds, i), func() {
+				fmt.Println("Test schedule service")
+				/*
+				if err := service.NotifyAppscript(s.ctx, srvIt); err != nil {
+					log.Println("job failed: ", err)
 				}
+					*/
+			}); err != nil {
+				s.cancel()
+				return err
 			}
 		}
 	}
-
-	return s, nil
+	return nil
 }
 
 func (s *Scheduler) Start() { s.backgroundService.Start() }

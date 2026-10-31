@@ -7,17 +7,21 @@ import (
 
 	"tracker/internal/platform/postgres/gen_queries"
 
+	"tracker/internal/datachange"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5"
 )
 
 type TrackerService struct {
 	db *pgxpool.Pool
+	notif *datachange.NotifyScheduler
 }
 
-func NewTrackerService(db *pgxpool.Pool) *TrackerService {
+func NewTrackerService(db *pgxpool.Pool, notif *datachange.NotifyScheduler) *TrackerService {
 	return &TrackerService{
 		db: db,
+		notif: notif,
 	}
 }
 
@@ -50,5 +54,8 @@ func (t *TrackerService) UpdateTracker(tracker *TrackerRequest, userID int32) (i
 		return 0, fmt.Errorf("db failed to convert row to struct: %w", err)
 	}
 
+	if !t.notif.Trigger(userID) {
+		return 0, fmt.Errorf("trigger failed: updating tracker")
+	}
 	return dbTracker.ID, nil
 }

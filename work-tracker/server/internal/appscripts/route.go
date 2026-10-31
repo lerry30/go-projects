@@ -4,11 +4,13 @@ import (
 	"tracker/internal/platform/router"
 	"tracker/internal/shared/handler"
 
+	"tracker/internal/datachange"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Route(db *pgxpool.Pool) func(r *router.Router){
-	appScriptService := NewAppScriptsService(db)
+func Route(db *pgxpool.Pool, notif *datachange.NotifyScheduler) func(r *router.Router){
+	appScriptService := NewAppScriptsService(db, notif)
 	appScriptHttpHandler := NewAppScriptsHttpHandler(appScriptService)
 
 	return func(r *router.Router) {

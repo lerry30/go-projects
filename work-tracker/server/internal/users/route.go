@@ -4,15 +4,17 @@ import (
 	"tracker/internal/shared/handler"
 	"tracker/internal/platform/router"
 
+	"tracker/internal/datachange"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // func Route(db *pgxpool.Pool, rdb *redis.RedisConnection) func(r *router.Router){}
 
-func Route(db *pgxpool.Pool) func(r *router.Router) {
+func Route(db *pgxpool.Pool, notif *datachange.NotifyScheduler) func(r *router.Router) {
 	// Interface-based Repository Injection
 	// Repo
-	userService := NewUserService(db)
+	userService := NewUserService(db, notif)
 
 	// Handler(repo)
 	userHttpHandler := NewUserHttpHandler(userService)

@@ -1,5 +1,6 @@
 package in_process_scheduling
 
 type SchedulesRepository interface {
-	RunningAppScripts() (*[]UsersScheduleEntity, error)
+	Users() (*[]UsersScheduleEntity, error)
+	User(userID int32) (*UsersScheduleEntity, error)
 }

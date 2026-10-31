@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"tracker/internal/platform/postgres/gen_queries"
+	
+	"tracker/internal/datachange"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5"
@@ -13,11 +15,13 @@ import (
 
 type AppScriptsService struct {
 	db *pgxpool.Pool
+	notif *datachange.NotifyScheduler
 }
 
-func NewAppScriptsService(db *pgxpool.Pool) *AppScriptsService {
+func NewAppScriptsService(db *pgxpool.Pool, notif *datachange.NotifyScheduler) *AppScriptsService {
 	return &AppScriptsService{
 		db: db,
+		notif: notif,
 	}
 }
 
@@ -48,6 +52,9 @@ func (a *AppScriptsService) UpdateAppScriptEndpoint(endpoint string, userID int3
 		return 0, fmt.Errorf("db failed to convert row to struct: %w", err)
 	}
 
+	if !a.notif.Trigger(userID) {
+		return 0, fmt.Errorf("trigger failed: updating appscript")
+	}
 	return appScriptData.ID, nil
 }
 
@@ -58,6 +65,10 @@ func (a *AppScriptsService) UpdateAppScriptStatus(status string, userID int32) (
 	dbAppScript, err := gen_queries.Update[int32, AppScriptsEntity](a.db, TableName, args, AppScriptsCols.EmployeeID, userID)
 	if err != nil {
 		return 0, fmt.Errorf("db error: %w", err)
+	}
+	
+	if !a.notif.Trigger(userID) {
+		return 0, fmt.Errorf("trigger failed: updating appscript's status")
 	}
 	return dbAppScript.ID, nil
 }

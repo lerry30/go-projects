@@ -29,3 +29,44 @@ type UsersScheduleEntity struct {
 	SecondBreakIn time.Time `db:"second_break_in"`
 	Logout time.Time `db:"logout"`
 }
+
+// Table column names
+type AppScriptsColumns struct {
+	ID string
+	EmployeeID string
+	Endpoint string
+	Status string
+	CreatedAt string
+	UpdatedAt string
+}
+
+type UsersColumns struct {
+	ID string
+	FirstName string
+	LastName string
+	Username string
+	Password string
+	CreatedAt string
+	UpdatedAt string
+}
+
+//-----------------------------
+
+var AppScriptsCols = AppScriptsColumns{
+	ID: "id",
+	EmployeeID: "employee_id",
+	Endpoint: "appscript_endpoint",
+	Status: "status",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+}
+
+var UserCols = UsersColumns{
+	ID: "id",
+	FirstName: "first_name",
+	LastName: "last_name",
+	Username: "username",
+	Password: "password",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
+}

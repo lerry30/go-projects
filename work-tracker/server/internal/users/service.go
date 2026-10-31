@@ -7,6 +7,8 @@ import (
 	"tracker/internal/platform/postgres/gen_queries"
 	"tracker/internal/shared/utils"
 	"tracker/internal/shared/token"
+	
+	"tracker/internal/datachange"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5"
@@ -14,11 +16,13 @@ import (
 
 type UserService struct {
 	db *pgxpool.Pool
+	notif *datachange.NotifyScheduler
 }
 
-func NewUserService(db *pgxpool.Pool) *UserService {
+func NewUserService(db *pgxpool.Pool, notif *datachange.NotifyScheduler) *UserService {
 	return &UserService{
 		db: db,
+		notif: notif,
 	}
 }
 
@@ -56,6 +60,9 @@ func (u *UserService) Create(user userSignUpRequest) (string, error) {
 		return "", fmt.Errorf("failed to create user token: %w", err)
 	}
 
+	if !u.notif.Trigger(newUser.ID) {
+		return "", fmt.Errorf("trigger failed: signing up")
+	}
 	return token, nil
 }
 
