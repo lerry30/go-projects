@@ -1,13 +1,12 @@
 package in_process_scheduling
 
 import (
-	"fmt"
 	"context"
 	"time"
 	"sync"
-	//"log"
+	"log"
 
-	//"tracker/internal/webhook"
+	"tracker/internal/webhook"
 
 	"github.com/robfig/cron/v3"
 )
@@ -41,26 +40,30 @@ func NewScheduler(loc *time.Location, user *User) *Scheduler {
 	}
 }
 
-func (s *Scheduler) Create() error {
-	//service := webhook.NewWebhookAppscript(user.FirstName, user.LastName, user.Endpoint, user.Status, user.SpreadSheetID)
+func (s *Scheduler) Create(callback *webhook.WebhookAppscript) error {
 	for _, wds := range weekdaysSched {
 		//fmt.Println(user.SchedTimeLogs[wds][0].Format("2006-01-02 15:04:05"))
 		for i, _ := range s.user.SchedTimeLogs[wds] {
 			//fmt.Println(user.Spec(wds, i))
-			/*var srvIt string
+			var srvIt string
 			if i >= len(serviceIdentities) {
 				srvIt = "log"
 			} else {
 				srvIt = serviceIdentities[i]
-			}*/
+			}
 
 			if _, err := s.backgroundService.AddFunc(s.user.Spec(wds, i), func() {
-				fmt.Println("Test schedule service")
-				/*
-				if err := service.NotifyAppscript(s.ctx, srvIt); err != nil {
+				//fmt.Println("Test schedule service")
+				s.mu.Lock()
+				parent := s.ctx
+				s.mu.Unlock()
+
+				runCtx, cancel := context.WithTimeout(parent, 10*time.Minute)
+				defer cancel()
+
+				if err := callback.NotifyAppscript(runCtx, srvIt); err != nil {
 					log.Println("job failed: ", err)
 				}
-					*/
 			}); err != nil {
 				s.cancel()
 				return err
