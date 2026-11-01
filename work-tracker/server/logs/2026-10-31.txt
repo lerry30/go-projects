@@ -1,8 +1,0 @@
-============================================================
-2026-10-31T16:10:35Z
-============================================================
-WARNING: failed to get appscripts running on db: %!w(*fmt.wrapError=&{db error getting running appscripts: failed to connect to `user=postgres database=work_tracker_db`:
-	[::1]:5432 (localhost): dial error: dial tcp [::1]:5432: connectex: No connection could be made because the target machine actively refused it.
-	127.0.0.1:5432 (localhost): dial error: dial tcp 127.0.0.1:5432: connectex: No connection could be made because the target machine actively refused it. 0xbc955b24180})
-************************************************************
-
