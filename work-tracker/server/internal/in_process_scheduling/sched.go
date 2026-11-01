@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"tracker/internal/platform/logger"
+	"tracker/internal/webhook"
 )
 
 type UsersWithSchedules struct {
@@ -27,7 +28,8 @@ func NewUsersWithSchedules(schedulesRepo SchedulesRepository, loc *time.Location
 		user := PopulateUserData(&(*dbUsersSched)[i])
 
 		scheduler := NewScheduler(loc, user)
-		_ = scheduler.Create()
+		callback := webhook.NewWebhookAppscript(user.FirstName, user.LastName, user.Endpoint, user.Status, user.SpreadSheetID)
+		_ = scheduler.Create(callback)
 
 		key := fmt.Sprintf("user-%d", user.UserID)
 		schedulers[key] = scheduler
