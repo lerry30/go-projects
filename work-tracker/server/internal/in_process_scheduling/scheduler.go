@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"context"
 	"time"
+	"sync"
 	//"log"
 
 	//"tracker/internal/webhook"
@@ -12,10 +13,12 @@ import (
 )
 
 type Scheduler struct {
+	mu sync.Mutex
 	backgroundService *cron.Cron
 	ctx context.Context
 	cancel context.CancelFunc
 	user *User
+	running bool
 }
 
 var weekdaysSched = []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}
@@ -34,6 +37,7 @@ func NewScheduler(loc *time.Location, user *User) *Scheduler {
 		ctx: ctx,
 		cancel: cancel,
 		user: user,
+		running: false,
 	}
 }
 
@@ -66,11 +70,29 @@ func (s *Scheduler) Create() error {
 	return nil
 }
 
-func (s *Scheduler) Start() { s.backgroundService.Start() }
+func (s *Scheduler) Start() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.running {
+		return
+	}
+	s.ctx, s.cancel = context.WithCancel(context.Background())
+	s.backgroundService.Start()
+	s.running = true
+}
 
 func (s *Scheduler) Stop(ctx context.Context) error {
+	s.mu.Lock()
+	if !s.running {
+		s.mu.Unlock()
+		return nil
+	}
+	s.running = false
 	cronCtx := s.backgroundService.Stop()
-	defer s.cancel()
+	cancel := s.cancel
+	s.mu.Unlock() // don't hold the lock while waiting
+
+	defer cancel()
 
 	select {
 	case <-cronCtx.Done():
@@ -78,4 +100,12 @@ func (s *Scheduler) Stop(ctx context.Context) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	}
+}
+
+func (s *Scheduler) Restart(ctx context.Context) error {
+	if err != s.Stop(ctx); err != nil {
+		return err
+	}
+	s.Start()
+	return nil
 }
