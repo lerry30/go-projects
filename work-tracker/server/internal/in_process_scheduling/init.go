@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"tracker/internal/platform/logger"
+	"tracker/internal/webhook"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -44,7 +45,8 @@ func UpdateSchedules(ctx context.Context, usersWithScheds *UsersWithSchedules) {
 
 			scheduler := NewScheduler(usersWithScheds.loc, user)
 			scheduler.Start()
-			_ = scheduler.Create()
+			callback := webhook.NewWebhookAppscript(user.FirstName, user.LastName, user.Endpoint, user.Status, user.SpreadSheetID)
+			_ = scheduler.Create(callback)
 
 			usersWithScheds.schedulers[userKey] = scheduler
 		case <-ctx.Done():
