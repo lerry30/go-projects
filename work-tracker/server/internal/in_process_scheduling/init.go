@@ -43,6 +43,7 @@ func UpdateSchedules(ctx context.Context, usersWithScheds *UsersWithSchedules) {
 			user := PopulateUserData(dbUserSched)
 
 			scheduler := NewScheduler(usersWithScheds.loc, user)
+			scheduler.Start()
 			_ = scheduler.Create()
 
 			usersWithScheds.schedulers[userKey] = scheduler
