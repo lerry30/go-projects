@@ -103,7 +103,7 @@ func (s *Scheduler) Stop(ctx context.Context) error {
 }
 
 func (s *Scheduler) Restart(ctx context.Context) error {
-	if err != s.Stop(ctx); err != nil {
+	if err := s.Stop(ctx); err != nil {
 		return err
 	}
 	s.Start()
