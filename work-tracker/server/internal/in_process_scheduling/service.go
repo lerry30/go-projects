@@ -35,7 +35,7 @@ func (s *SchedulesService) Users() (*[]UsersScheduleEntity, error) {
 
 	dbUsersSched, err := pgx.CollectRows(rows, pgx.RowToStructByName[UsersScheduleEntity])
 	if errors.Is(err, pgx.ErrNoRows) {
-		return &[]UsersScheduleEntity{}, nil
+		return &[]UsersScheduleEntity{}, fmt.Errorf("some associated tables has no rows")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert row to struct in in_process_scheduling.Users(): %w", err)
@@ -60,7 +60,7 @@ func (s *SchedulesService) User(userID int32) (*UsersScheduleEntity, error) {
 
 	dbUserSched, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[UsersScheduleEntity])
 	if errors.Is(err, pgx.ErrNoRows) {
-		return &UsersScheduleEntity{}, nil
+		return &UsersScheduleEntity{}, fmt.Errorf("some associated tables has no rows")
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert row to struct in in_process_scheduling.User(id): %w", err)
