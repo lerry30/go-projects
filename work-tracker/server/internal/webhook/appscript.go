@@ -34,6 +34,8 @@ func (w *WebhookAppscript) NotifyAppscript(ctx context.Context, action string) e
 		return fmt.Errorf("status for the current schedule was paused: %s", now)
 	}
 
+	log.Println("sending...")
+
 	formattedSheetName := fmt.Sprintf("%d.%d", int(now.Month()), now.Day())
 
 	payload := struct{
@@ -62,6 +64,9 @@ func (w *WebhookAppscript) NotifyAppscript(ctx context.Context, action string) e
 	defer resp.Body.Close()
 
 	log.Printf("Webhook sent, status: %d", resp.StatusCode)
+
+	b, _ := json.MarshalIndent(payload, "", "  ")
+	fmt.Println(string(b))
 
 	return nil
 }
