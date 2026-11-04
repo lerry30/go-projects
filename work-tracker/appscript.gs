@@ -27,11 +27,13 @@ function handleDataChange(reqBody) {
   const trackerId = reqBody['tracker-id'];
   const sheetName = reqBody['sheet-name'];
   const fname = reqBody['first-name'];
+  const lname = reqBody['last-name'];
   const action = reqBody['log'];
 
   const tracker = SpreadsheetApp.openById(trackerId);
   const sheetNames = tracker.getSheets().map(sh => sh.getName());
   const logActions = ['login', '1st-break-out', '1st-break-in', 'lunch-out', 'lunch-in', '2nd-break-out', '2nd-break-in', 'logout'];
+  const fNames = formattedNames(fname, lname)
 
   if(!sheetNames.includes(sheetName)) {
     return {status: 'fail: sheet not found', action};
@@ -67,8 +69,8 @@ function handleDataChange(reqBody) {
       ) {
         colLetters.push(colLetter);
       }
-      
-      if(nCell.match(new RegExp(fname, 'ig'))) {
+
+      if(fNames.includes(nCell)) {
         //Logger.log(`Cell ${notation} → value: "${cell}", row: ${rowNumber}, col: ${colLetter}`);
         empRowNo = rowNumber;
       }
@@ -84,10 +86,14 @@ function handleDataChange(reqBody) {
     return {status: 'action not found', action};
   }
 
+  if(!empRowNo) {
+    return {status: 'employee row not found', action};
+  }
+
   const cell = `${colLetters[i]}${empRowNo}`;
   sheet.getRange(cell).setValue(formattedCurrentTime());
 
-  if(sheet.getRange(cell).getValue().trim() === "") {
+  if(String(sheet.getRange(cell).getValue()).trim() === "") {
     return {status: 'failed to insert log', action};
   }
 
@@ -103,6 +109,15 @@ function formattedCurrentTime() {
     hour12: true,
   });
   return formatted;
+}
+
+function formattedNames(firstName, lastName) {
+  firstName = firstName.trim().toLowerCase();
+  lastName = lastName.trim().toLowerCase();
+  return [
+    `${firstName} ${lastName}`,
+    `${lastName}, ${firstName}`,
+  ];
 }
 
 /*
