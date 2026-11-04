@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
-
+	
 	"tracker/internal/platform/logger"
 	"tracker/internal/webhook"
 )
@@ -19,13 +19,17 @@ type UsersWithSchedules struct {
 func NewUsersWithSchedules(schedulesRepo SchedulesRepository, loc *time.Location, buf int) *UsersWithSchedules {
 	dbUsersSched, err := schedulesRepo.Users()
 	if err != nil {
-		logger.LogError("WARNING: failed to get appscripts running on db", err)
+		logger.LogError("failed to get (users) data for setting up scheduler", err)
 		return &UsersWithSchedules{}
 	}
 
 	schedulers := make(map[string]*Scheduler)
 	for i := 0; i < len((*dbUsersSched)); i++ {
-		user := PopulateUserData(&(*dbUsersSched)[i])
+		user, err := PopulateUserData(&(*dbUsersSched)[i])
+		if err != nil {
+			logger.LogError("failed to create new user", err)
+			continue
+		}
 
 		scheduler := NewScheduler(loc, user)
 		callback := webhook.NewWebhookAppscript(user.FirstName, user.LastName, user.Endpoint, user.Status, user.SpreadSheetID)
@@ -56,34 +60,4 @@ func (u *UsersWithSchedules) StopAll(ctx context.Context) error {
 		}
 	}
 	return nil
-}
-
-func PopulateUserData(rawUserData *UsersScheduleEntity) *User {
-	var user User
-	user.UserID = rawUserData.UserID
-	user.FirstName = rawUserData.FirstName
-	user.LastName = rawUserData.LastName
-	user.Username = rawUserData.Username
-	user.AppScriptID = rawUserData.AppScriptID
-	user.Endpoint = rawUserData.Endpoint
-	user.Status = rawUserData.Status
-	user.TrackerID = rawUserData.TrackerID
-	user.SpreadSheetID = rawUserData.SpreadSheetID
-	user.Year = rawUserData.Year
-	user.Month = rawUserData.Month
-	user.TimeLogsID = rawUserData.TimeLogsID
-
-	timeLogs := []time.Time{
-		rawUserData.Login,
-		rawUserData.FirstBreakOut,
-		rawUserData.FirstBreakIn,
-		rawUserData.LunchOut,
-		rawUserData.LunchIn,
-		rawUserData.SecondBreakOut,
-		rawUserData.SecondBreakIn,
-		rawUserData.Logout,
-	}
-	user.CreateSchedules(timeLogs)
-	
-	return &user
 }
