@@ -61,7 +61,7 @@ func (u *UserService) Create(user userSignUpRequest) (string, error) {
 	}
 
 	if !u.notif.Trigger(newUser.ID) {
-		return "", fmt.Errorf("trigger failed: signing up")
+		fmt.Errorf("trigger failed: signing up")
 	}
 	return token, nil
 }

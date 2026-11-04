@@ -61,7 +61,7 @@ func (t *TimeLogsService) UpdateTimeLogs(timeLogs *TimeLogsRequest, userID int32
 	}
 
 	if !t.notif.Trigger(userID) {
-		return 0, fmt.Errorf("trigger failed: updating time logs")
+		fmt.Errorf("trigger failed: updating time logs")
 	}
 	return dbTimeLogs.ID, nil
 }

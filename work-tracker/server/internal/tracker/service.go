@@ -55,7 +55,7 @@ func (t *TrackerService) UpdateTracker(tracker *TrackerRequest, userID int32) (i
 	}
 
 	if !t.notif.Trigger(userID) {
-		return 0, fmt.Errorf("trigger failed: updating tracker")
+		fmt.Errorf("trigger failed: updating tracker")
 	}
 	return dbTracker.ID, nil
 }
