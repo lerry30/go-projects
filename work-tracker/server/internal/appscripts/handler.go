@@ -41,6 +41,7 @@ func (a *AppScriptsHttpHandler) AppScriptHandler(w http.ResponseWriter, r *http.
 	resAppScript := AppScriptsResponse{
 		ID: dbAppScript.ID,
 		Endpoint: dbAppScript.Endpoint,
+		Status: dbAppScript.Status,
 		CreatedAt: dbAppScript.CreatedAt,
 		UpdatedAt: dbAppScript.UpdatedAt,
 	}
