@@ -53,7 +53,7 @@ func (a *AppScriptsService) UpdateAppScriptEndpoint(endpoint string, userID int3
 	}
 
 	if !a.notif.Trigger(userID) {
-		return 0, fmt.Errorf("trigger failed: updating appscript")
+		fmt.Errorf("trigger failed: updating appscript")
 	}
 	return appScriptData.ID, nil
 }
@@ -68,7 +68,7 @@ func (a *AppScriptsService) UpdateAppScriptStatus(status string, userID int32) (
 	}
 	
 	if !a.notif.Trigger(userID) {
-		return 0, fmt.Errorf("trigger failed: updating appscript's status")
+		fmt.Errorf("trigger failed: updating appscript's status")
 	}
 	return dbAppScript.ID, nil
 }
