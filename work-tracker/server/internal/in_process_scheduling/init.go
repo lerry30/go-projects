@@ -24,13 +24,13 @@ func UpdateSchedules(ctx context.Context, usersWithScheds *UsersWithSchedules) {
 		select {
 		case userID, ok := <-usersWithScheds.UserID:
 			if !ok {
-				return // channel close
+				continue // channel close
 			}
 
 			dbUserSched, err := usersWithScheds.schedulesRepo.User(userID)
 			if err != nil {
-				logger.LogError("WARNING: failed to get appscripts running on db", err)
-				return
+				logger.LogError("failed to get (user) data for setting up scheduler", err)
+				continue
 			}
 
 			userKey := fmt.Sprintf("user-%d", userID)
@@ -41,7 +41,11 @@ func UpdateSchedules(ctx context.Context, usersWithScheds *UsersWithSchedules) {
 				delete(usersWithScheds.schedulers, userKey)
 			}
 
-			user := PopulateUserData(dbUserSched)
+			user, err := PopulateUserData(dbUserSched)
+			if err != nil {
+				logger.LogError("failed to create new user(runtime)", err)
+				continue
+			}
 
 			scheduler := NewScheduler(usersWithScheds.loc, user)
 			scheduler.Start()
@@ -49,6 +53,8 @@ func UpdateSchedules(ctx context.Context, usersWithScheds *UsersWithSchedules) {
 			_ = scheduler.Create(callback)
 
 			usersWithScheds.schedulers[userKey] = scheduler
+
+			fmt.Printf("%v\n", usersWithScheds.schedulers)
 		case <-ctx.Done():
 			return
 		}
