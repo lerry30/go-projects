@@ -65,17 +65,21 @@ func (t *TrackerHttpHandler) UpdateTrackerHandler(w http.ResponseWriter, r *http
 		return resErr
 	}
 
-	trackerReq.SpreadSheetID = strings.TrimSpace(trackerReq.SpreadSheetID)
+	trackerReq.SpreadSheetID = strings.TrimSpace(trackerReq.SpreadSheetID)	
 	year := int(trackerReq.Year)
 	month := int(trackerReq.Month)
+
+	if trackerReq.SpreadSheetID == "" {
+		logger.LogError("failed to update the spread sheet id. The field must not be empty", nil)
+		resErr.WriteMessage(http.StatusBadRequest, "failed to update the spread sheet id. The field must not be empty")
+		return resErr
+	}
 	
 	// Month needs to be type cast to turn it to numeric representation, 
 	// because it implements String() that returns month in text(November)
 	dateNow := time.Now()
 	currentYear := dateNow.Year()
 	currentMonth := int(dateNow.Month())
-
-	fmt.Println(currentYear)
 
 	currentYearOffset := year-currentYear
 	if year < 2000 || currentYearOffset > 1 || currentYearOffset < -1 {
