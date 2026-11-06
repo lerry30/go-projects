@@ -8,6 +8,7 @@ import (
 	"time"
 	"encoding/json"
 	"net/http"
+	"math/rand"
 )
 
 type WebhookAppscript struct {
@@ -56,6 +57,10 @@ func (w *WebhookAppscript) NotifyAppscript(ctx context.Context, action string) e
 	if err != nil {
 		return err
 	}
+
+	// Delay
+	secondsDelay := rand.Intn(20) // 20 seconds
+	time.Sleep(time.Duration(secondsDelay) * time.Second)
 
 	resp, err := http.Post(w.endpoint, "application/json", bytes.NewBuffer(body))
 	if err != nil {
